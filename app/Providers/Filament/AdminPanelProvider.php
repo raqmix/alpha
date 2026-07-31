@@ -55,7 +55,7 @@ class AdminPanelProvider extends PanelProvider
                 ->profile(isSimple: false)
                 ->colors([
                     'primary' => setting("site.admin_panel_color")?? '#C9AC80',
-                    'dotjo' => '#98CF8C',
+                    'raqmix' => '#98CF8C',
                 ])
                 ->databaseNotifications()
                 ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
@@ -122,11 +122,11 @@ class AdminPanelProvider extends PanelProvider
                 ])
                 ->renderHook(
                     PanelsRenderHook::TOPBAR_AFTER,
-                    fn (): View => view('vendor.custom.dotjologo-middle'),
+                    fn (): View => view('vendor.custom.raqmixlogo-middle'),
                 )
                 ->renderHook(
                     PanelsRenderHook::AUTH_LOGIN_FORM_BEFORE,
-                    fn (): View => view('vendor.custom.dotjologo-login'),
+                    fn (): View => view('vendor.custom.raqmixlogo-login'),
                 );
             if (!$activateOTP)
             {

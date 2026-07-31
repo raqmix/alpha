@@ -42,22 +42,22 @@ class Importer extends ImportsImporter
             ImportColumn::make('author:en')
                 ->requiredMapping()
                 ->rules(['string', 'max:255'])
-                ->examples(['dotjo', 'green']),
+                ->examples(['raqmix', 'green']),
 
             ImportColumn::make('author:ar')
                 ->requiredMapping()
                 ->rules(['string', 'max:255'])
-                ->examples(['dotjo', 'green']),
+                ->examples(['raqmix', 'green']),
 
             ImportColumn::make('keywords:en')
                 ->requiredMapping()
                 ->rules(['string', 'max:255'])
-                ->examples(['dotjo', 'green']),
+                ->examples(['raqmix', 'green']),
 
             ImportColumn::make('keywords:ar')
                 ->requiredMapping()
                 ->rules(['string', 'max:255'])
-                ->examples(['dotjo', 'green']),
+                ->examples(['raqmix', 'green']),
 
 
             ImportColumn::make('path')

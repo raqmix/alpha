@@ -67,7 +67,7 @@
                 * Reference: https://github.com/bepsvpt/secure-headers/issues/58#issuecomment-782332442
                 */
 
-                'x-powered-by' => 'dotjo',
+                'x-powered-by' => 'raqmix',
 
                 /*
                 * X-XSS-Protection

@@ -68,7 +68,7 @@ class Seo extends Component
 
         $data["title"]       =   $this->seoTitle ?? setting("{$lng}.general.title");
         $data["brief"]       =   $this->seoDescription ?? setting("{$lng}.general.description");
-        $data["author"]      =   $this->seoAuther ?? "dotjo";
+        $data["author"]      =   $this->seoAuther ?? "raqmix";
         $data["keyword"]     =   $this->seoKeywords ?? setting("{$lng}.general.keywords");
         $data["image"]       =   $this->seoImage ?? $seoImage?->url ;
         $data["ogType"]      =   $this->seoOGType ?? "website";
