@@ -8,6 +8,7 @@ use App\Models\Media\Media;
 use App\Traits\HasSeo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Arr;
 use Laravel\Scout\Searchable;
 
 class Product extends BaseTranslationModel
@@ -132,10 +133,18 @@ class Product extends BaseTranslationModel
 
     protected function resolveImageUrl(array $item, string $mediaKey, string $urlKey): ?string
     {
-        if (!empty($item[$mediaKey])) {
-            $media = Media::find($item[$mediaKey]);
+        $mediaId = $item[$mediaKey] ?? null;
 
-            if ($media) {
+        // Some sections store this as an array; find() would then return a
+        // Collection instead of a Media model and reading ->url would fail.
+        if (is_array($mediaId)) {
+            $mediaId = Arr::first($mediaId);
+        }
+
+        if (!empty($mediaId)) {
+            $media = Media::find($mediaId);
+
+            if ($media instanceof Media) {
                 return $media->url ?? $media->getUrl();
             }
         }
