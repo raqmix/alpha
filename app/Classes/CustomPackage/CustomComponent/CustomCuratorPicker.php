@@ -3,8 +3,9 @@
 namespace App\Classes\CustomPackage\CustomComponent;
 
 use Filament\Actions\Action;
-use Livewire\Component;
+use Filament\Support\Enums\Width;
 use Awcodes\Curator\Components\Forms\CuratorPicker;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Str;
 // Curator v5 moved its helpers to the global namespace.
 use function get_media_items;
@@ -30,6 +31,16 @@ class CustomCuratorPicker extends CuratorPicker
             fn (CuratorPicker $component): Action => $component->getPickerActionAtDropdown(),
         ]);
     }
+    /**
+     * "Replace Image" entry shown in the item dropdown, alongside Edit /
+     * Download / Remove.
+     *
+     * Curator v5 no longer opens the panel by dispatching an 'open-modal'
+     * event with a settings payload; the picker action renders the panel as
+     * its own modal content instead. This mirrors CuratorPicker::getPickerAction()
+     * so the panel receives exactly the settings v5 expects, and only differs
+     * in presentation (dropdown item rather than a button).
+     */
     public function getPickerActionAtDropdown(): Action
     {
         return Action::make('new_open_curator_picker')
@@ -37,8 +48,13 @@ class CustomCuratorPicker extends CuratorPicker
             ->color('gray')
             ->icon('heroicon-s-receipt-refund')
             ->hidden(fn (CuratorPicker $component): bool => $component->isDisabled())
-            ->action(function (CuratorPicker $component, Component $livewire) {
-                $livewire->dispatch('open-modal', id: 'curator-panel', settings: [
+            ->modalSubmitAction(false)
+            ->modalCancelAction(false)
+            ->modalWidth(Width::Screen)
+            ->modalCloseButton(false)
+            ->modalContent(fn (CuratorPicker $component): View => view('curator::components.modals.curator-panel', [
+                'key' => $component->getKey(),
+                'settings' => [
                     'acceptedFileTypes' => $component->getAcceptedFileTypes(),
                     'defaultSort' => $component->getDefaultPanelSort(),
                     'directory' => $component->getDirectory(),
@@ -49,7 +65,7 @@ class CustomCuratorPicker extends CuratorPicker
                     'imageResizeTargetHeight' => $component->getImageResizeTargetHeight(),
                     'isLimitedToDirectory' => $component->isLimitedToDirectory(),
                     'isTenantAware' => $component->isTenantAware(),
-                    'tenantOwnershipRelationshipName' => $component->tenantOwnershipRelationshipName(),
+                    'tenantOwnershipRelationshipName' => $component->getTenantOwnershipRelationshipName(),
                     'isMultiple' => $component->isMultiple(),
                     'maxItems' => $component->getMaxItems(),
                     'maxSize' => $component->getMaxSize(),
@@ -60,10 +76,10 @@ class CustomCuratorPicker extends CuratorPicker
                     'selected' => (array) $component->getState(),
                     'shouldPreserveFilenames' => $component->shouldPreserveFilenames(),
                     'statePath' => $component->getStatePath(),
-                    'types' => $component->getAcceptedFileTypes(),
                     'visibility' => $component->getVisibility(),
-                ]);
-            });
+                ],
+            ]))
+            ->action(fn (): null => null);
     }
 
 

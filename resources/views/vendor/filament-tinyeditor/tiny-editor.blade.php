@@ -129,6 +129,34 @@
                     uploadingMessage: '{{ $getUploadingMessage() ?: 'Uploading image...' }}',
                     key: '{{ $getKey() }}',
                     setup: (editor) => {
+                        /*
+                         * TinyMCE renders its container with an inline
+                         * visibility:hidden / height:0 placeholder and is meant
+                         * to clear it once rendering finishes. Under Filament v5
+                         * that final step never runs here, so the editor
+                         * initialises correctly (initialized === true, getBody()
+                         * present) but stays collapsed to 0px and looks like a
+                         * thin line. Clearing it on init, and re-applying the
+                         * configured height, restores it.
+                         */
+                        editor.on('init', () => {
+                            const container = editor.getContainer();
+
+                            if (! container) {
+                                return;
+                            }
+
+                            container.style.visibility = 'visible';
+
+                            const height = editor.options?.get?.('height') ?? editor.settings?.height;
+
+                            if (height) {
+                                container.style.height = typeof height === 'number' ? height + 'px' : height;
+                            } else {
+                                container.style.removeProperty('height');
+                            }
+                        });
+
                         editor.on('blur change keyup', () => {
                             $wire.set('{{ $statePath }}', editor.getContent(), false);
                         })
