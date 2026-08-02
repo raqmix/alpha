@@ -70,9 +70,9 @@ class UserResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return Utils::isResourceNavigationGroupEnabled()
-            ? __('filament-shield::filament-shield.nav.group')
-            : '';
+        // Shield v4 removed Utils::isResourceNavigationGroupEnabled() along with
+        // the shield_resource.navigation_group config key, which was enabled here.
+        return __('filament-shield::filament-shield.nav.group');
     }
 
     public static function form(Schema $schema): Schema

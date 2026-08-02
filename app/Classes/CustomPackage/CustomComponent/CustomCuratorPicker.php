@@ -6,7 +6,8 @@ use Filament\Actions\Action;
 use Livewire\Component;
 use Awcodes\Curator\Components\Forms\CuratorPicker;
 use Illuminate\Support\Str;
-use function Awcodes\Curator\get_media_items;
+// Curator v5 moved its helpers to the global namespace.
+use function get_media_items;
 
 
 class CustomCuratorPicker extends CuratorPicker
