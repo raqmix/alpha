@@ -45,6 +45,7 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
+            "CactusGalaxy\\FilamentAstrotomic\\": "packages/filament-astrotomic/src/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }
