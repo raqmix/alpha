@@ -91,7 +91,7 @@ class CountryResource extends Resource
     public static function form(Schema $schema): Schema
     {
 
-        return $schema->components([
+        return $schema->columns(1)->components([
 
             TranslatableTabsNoArabic::make()
                 ->columnSpan(2)

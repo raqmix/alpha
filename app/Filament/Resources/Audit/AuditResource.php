@@ -62,7 +62,7 @@ class AuditResource extends Resource
     public static function form(Schema $schema): Schema
     {
 
-        return $schema->components([]);
+        return $schema->columns(1)->components([]);
     }
 
     public static function table(Table $table): Table
