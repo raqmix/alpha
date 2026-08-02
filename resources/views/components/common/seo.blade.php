@@ -41,7 +41,9 @@
 
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
+  {{-- Escaped: Laravel 11+ added an @context Blade directive, so a bare
+       "@context" here is compiled as Blade and breaks the template. --}}
+  "@@context": "https://schema.org",
   "@type": "WebSite",
   "name": "{{setting("{$lng}.general.title")}}",
   "url": "{{request()->getSchemeAndHttpHost()}}"
