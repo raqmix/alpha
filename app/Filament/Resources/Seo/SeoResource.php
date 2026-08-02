@@ -2,6 +2,15 @@
 
 namespace App\Filament\Resources\Seo;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Columns\TextColumn;
+use App\Classes\FilamentUtility;
+use Filament\Actions\BulkActionGroup;
 use App\Classes\CustomPackage\CustomComponent\CustomCuratorPicker;
 use App\Filament\Resources\Seo\Exports\Exporter;
 use App\Filament\Resources\Seo\Imports\Importer;
@@ -17,9 +26,6 @@ use CactusGalaxy\FilamentAstrotomic\Resources\Concerns\ResourceTranslatable;
 use CactusGalaxy\FilamentAstrotomic\TranslatableTab;
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
 
 use App\Traits\AllColumnActionVisibility;
 
@@ -37,7 +43,7 @@ class SeoResource extends Resource
 
     protected static ?string $model = Seo::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-signal';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-signal';
 
     public static function getNavigationBadge(): ?string
     {
@@ -77,10 +83,10 @@ class SeoResource extends Resource
     }
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
 
-        return $form->schema([
+        return $schema->components([
 
             TranslatableTabsNoArabic::make()
                 ->columnSpanFull()
@@ -92,7 +98,7 @@ class SeoResource extends Resource
                             ->schema([
 
 
-                                Forms\Components\TextInput::make('path')
+                                TextInput::make('path')
                                 ->label(__("path"))
                                 ->unique(ignoreRecord: true)
                                 ->required()
@@ -113,7 +119,7 @@ class SeoResource extends Resource
                                 ]),
 
 
-                                Forms\Components\TextInput::make($tab->makeName('title'))
+                                TextInput::make($tab->makeName('title'))
                                 ->label(__("Title[". $tab->getLocale()."]"))
                                 ->required()
                                 ->maxLength(255)
@@ -122,7 +128,7 @@ class SeoResource extends Resource
                                     'not_regex' => 'HTML is invalid',
                                 ]),
 
-                                Forms\Components\Textarea::make($tab->makeName('description'))
+                                Textarea::make($tab->makeName('description'))
                                 ->label(__("Description[". $tab->getLocale()."]"))
                                 ->maxLength(255)
                                 ->notRegex('/<[^b][^r][^>]*>/')
@@ -130,7 +136,7 @@ class SeoResource extends Resource
                                     'not_regex' => 'HTML is invalid',
                                 ]),
 
-                                Forms\Components\TextInput::make($tab->makeName('author'))
+                                TextInput::make($tab->makeName('author'))
                                 ->label(__("Author[". $tab->getLocale()."]"))
                                 ->maxLength(255)
                                 ->notRegex('/<[^b][^r][^>]*>/')
@@ -138,7 +144,7 @@ class SeoResource extends Resource
                                     'not_regex' => 'HTML is invalid',
                                 ]),
 
-                                Forms\Components\Textarea::make($tab->makeName('keywords'))
+                                Textarea::make($tab->makeName('keywords'))
                                 ->label(__("Keywords[". $tab->getLocale()."]"))
                                 ->maxLength(255)
                                 ->notRegex('/<[^b][^r][^>]*>/')
@@ -166,7 +172,7 @@ class SeoResource extends Resource
                             ->columnSpan(1)
                             ->schema([
 
-                                    Forms\Components\DatePicker::make('published_at')
+                                    DatePicker::make('published_at')
                                         ->label(__("Published At"))
                                         ->rules(['date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'])
                                         ->default(Carbon::now())
@@ -176,7 +182,7 @@ class SeoResource extends Resource
                                             'not_regex' => 'HTML is invalid',
                                         ]),
 
-                                    Forms\Components\Select::make('status')
+                                    Select::make('status')
                                         ->label(__("Status"))
                                         ->required()
                                         ->options(Seo::getStatusList())
@@ -203,7 +209,7 @@ class SeoResource extends Resource
             ->columns([
 
 
-                Tables\Columns\TextColumn::make('path')
+                TextColumn::make('path')
                     ->label(__("path"))
                     ->searchable()
                     ->words('5')
@@ -212,12 +218,12 @@ class SeoResource extends Resource
 
                 // \App\Classes\FilamentUtility::publishedAtColumn(),
 
-                \App\Classes\FilamentUtility::statusColumn(static::$model),
-                \App\Classes\FilamentUtility::createdAtColumn(),
-                \App\Classes\FilamentUtility::updatedAtColumn(),
+                FilamentUtility::statusColumn(static::$model),
+                FilamentUtility::createdAtColumn(),
+                FilamentUtility::updatedAtColumn(),
 
-                \App\Classes\FilamentUtility::creatorColumn(),
-                \App\Classes\FilamentUtility::updaterColumn(),
+                FilamentUtility::creatorColumn(),
+                FilamentUtility::updaterColumn(),
 
 
 
@@ -233,7 +239,7 @@ class SeoResource extends Resource
                 static::renderFilterActions(),
             )
 
-            ->actions(
+            ->recordActions(
                 static::renderTableActions(),
             )
             ->headerActions(
@@ -241,8 +247,8 @@ class SeoResource extends Resource
                 static::renderHeaderActions(Importer::class, Exporter::class),
 
             )
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make(
+            ->toolbarActions([
+                BulkActionGroup::make(
                     static::renderBulkActions(Exporter::class)
 
                 ),

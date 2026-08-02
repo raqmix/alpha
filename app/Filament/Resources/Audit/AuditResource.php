@@ -2,16 +2,18 @@
 
 namespace App\Filament\Resources\Audit;
 
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ExportAction;
+use Filament\Support\Enums\Size;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\ExportBulkAction;
 use App\Classes\FilamentUtility;
 use App\Filament\Resources\Audit\Exports\Exporter;
 use App\Filament\Resources\Audit\ResourcePages\ListItems;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Support\Enums\ActionSize;
-use Filament\Tables\Actions\ExportAction;
-use Filament\Tables\Actions\ExportBulkAction;
 use OwenIt\Auditing\Models\Audit;
 use PepperFM\FilamentJson\Columns\JsonColumn;
 
@@ -19,7 +21,7 @@ class AuditResource extends Resource
 {
     protected static ?string $model = Audit::class;
 
-    protected static ?string $navigationIcon = 'heroicon-s-pencil-square';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-s-pencil-square';
 
     public static function getNavigationBadge(): ?string
     {
@@ -57,10 +59,10 @@ class AuditResource extends Resource
 
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
 
-        return $form->schema([]);
+        return $schema->components([]);
     }
 
     public static function table(Table $table): Table
@@ -70,25 +72,25 @@ class AuditResource extends Resource
 
 
 
-                Tables\Columns\TextColumn::make('user.username')
+                TextColumn::make('user.username')
                     ->label(__("User"))
                     ->searchable(),
 
 
-                Tables\Columns\TextColumn::make('event')
+                TextColumn::make('event')
                     ->label(__("Event"))
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('auditable_type')
+                TextColumn::make('auditable_type')
                     ->label(__("Model"))
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('auditable_type')
+                TextColumn::make('auditable_type')
                     ->label(__("Model"))
                     ->searchable(),
 
 
-                Tables\Columns\TextColumn::make('auditable_id')
+                TextColumn::make('auditable_id')
                     ->label(__("Model ID"))
                     ->searchable(),
 
@@ -109,15 +111,15 @@ class AuditResource extends Resource
                 FilamentUtility::createdAtColumn(),
                 FilamentUtility::updatedAtColumn(),
 
-                Tables\Columns\TextColumn::make('url')
+                TextColumn::make('url')
                     ->label(__("Url")),
 
 
-                Tables\Columns\TextColumn::make('ip_address')
+                TextColumn::make('ip_address')
                     ->label(__("IP Address")),
 
 
-                Tables\Columns\TextColumn::make('user_agent')
+                TextColumn::make('user_agent')
                     ->label(__("User Agent")),
 
 
@@ -131,7 +133,7 @@ class AuditResource extends Resource
 
             ])
 
-            ->actions([])
+            ->recordActions([])
             ->headerActions([
 
                 ExportAction::make()
@@ -140,11 +142,11 @@ class AuditResource extends Resource
                     ->color("success")
                     ->icon("heroicon-o-inbox-arrow-down")
                     ->iconButton()
-                    ->size(ActionSize::Large),
+                    ->size(Size::Large),
 
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
 
                     ExportBulkAction::make()
                     ->exporter(Exporter::class)

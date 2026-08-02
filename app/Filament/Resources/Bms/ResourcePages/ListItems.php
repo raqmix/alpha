@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Bms\ResourcePages;
 
+use Filament\Schemas\Components\Tabs\Tab;
 use App\Filament\Resources\Bms\Model\Bms;
 use App\Filament\Resources\BaseResource\Pages\ListBase;
 use App\Filament\Resources\Bms\BmsResource;
-use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 

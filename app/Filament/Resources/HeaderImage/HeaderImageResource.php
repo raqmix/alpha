@@ -2,6 +2,19 @@
 
 namespace App\Filament\Resources\HeaderImage;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use App\Classes\FilamentUtility;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
 use App\Classes\CustomPackage\CustomComponent\CustomCuratorPicker;
 use App\Filament\Resources\HeaderImage\Model\HeaderImage;
 use App\Filament\Resources\HeaderImage\ResourcePages\Create;
@@ -15,9 +28,6 @@ use CactusGalaxy\FilamentAstrotomic\Resources\Concerns\ResourceTranslatable;
 use CactusGalaxy\FilamentAstrotomic\TranslatableTab;
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
 
 use App\Traits\AllColumnActionVisibility;
 
@@ -36,7 +46,7 @@ class HeaderImageResource extends Resource
 
     protected static ?string $model = HeaderImage::class;
 
-    protected static ?string $navigationIcon = 'heroicon-s-photo';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-s-photo';
 
     protected static bool $shouldRegisterNavigation = false;
 
@@ -76,10 +86,10 @@ class HeaderImageResource extends Resource
 
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
 
-        return $form->schema([
+        return $schema->components([
 
             TranslatableTabsNoArabic::make()
                 ->columnSpanFull()
@@ -90,7 +100,7 @@ class HeaderImageResource extends Resource
                             ->columnSpan(2)
                             ->schema([
 
-                                Forms\Components\TextInput::make($tab->makeName('title'))
+                                TextInput::make($tab->makeName('title'))
                                     ->label(__("Title[" . $tab->getLocale() . "]"))
                                     ->maxLength(255)
                                     ->notRegex('/<[^b][^r][^>]*>/')
@@ -111,7 +121,7 @@ class HeaderImageResource extends Resource
 
 
 
-                                Forms\Components\TextInput::make('path')
+                                TextInput::make('path')
                                     ->label(__("path"))
                                     ->unique(ignoreRecord: true)
                                     ->required()
@@ -153,7 +163,7 @@ class HeaderImageResource extends Resource
                             ->columnSpan(1)
                             ->schema([
 
-                                Forms\Components\DatePicker::make('published_at')
+                                DatePicker::make('published_at')
                                     ->label(__("Published At"))
                                     ->rules(['date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'])
                                     ->default(Carbon::now())
@@ -163,7 +173,7 @@ class HeaderImageResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label(__("Status"))
                                     ->required()
                                     ->options(HeaderImage::getStatusList())
@@ -191,21 +201,21 @@ class HeaderImageResource extends Resource
 
                 CuratorColumn::make("image_id")->size(40)->ring(true),
 
-                Tables\Columns\TextColumn::make('path')
+                TextColumn::make('path')
                     ->label(__("path"))
                     ->searchable()
                     ->words('5')
                     ->html(),
 
 
-                \App\Classes\FilamentUtility::publishedAtColumn(),
+                FilamentUtility::publishedAtColumn(),
 
-                \App\Classes\FilamentUtility::statusColumn(static::$model),
-                \App\Classes\FilamentUtility::createdAtColumn(),
-                \App\Classes\FilamentUtility::updatedAtColumn(),
+                FilamentUtility::statusColumn(static::$model),
+                FilamentUtility::createdAtColumn(),
+                FilamentUtility::updatedAtColumn(),
 
-                \App\Classes\FilamentUtility::creatorColumn(),
-                \App\Classes\FilamentUtility::updaterColumn(),
+                FilamentUtility::creatorColumn(),
+                FilamentUtility::updaterColumn(),
 
 
 
@@ -222,29 +232,29 @@ class HeaderImageResource extends Resource
                 static::renderFilterActions(),
             )
 
-            ->actions(
+            ->recordActions(
                 static::renderTableActions(),
             )
             ->headerActions([])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('publish')
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    BulkAction::make('publish')
                         ->action(fn (Collection $records) => static::BulkActivate($records))
                         ->deselectRecordsAfterCompletion()
                         ->requiresConfirmation()
                         ->color('success')
                         ->icon('fas-toggle-on')
                         ->visible(static::toggleColumnVisibility()),
-                    Tables\Actions\BulkAction::make('pending')
+                    BulkAction::make('pending')
                         ->action(fn (Collection $records) => static::BulkDeactivate($records))
                         ->deselectRecordsAfterCompletion()
                         ->requiresConfirmation()
                         ->color('warning')
                         ->icon('fas-toggle-off')
                         ->visible(static::toggleColumnVisibility()),
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ]);
     }

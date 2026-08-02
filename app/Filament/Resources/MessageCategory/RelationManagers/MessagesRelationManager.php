@@ -2,6 +2,17 @@
 
 namespace App\Filament\Resources\MessageCategory\RelationManagers;
 
+use Filament\Schemas\Schema;
+use App\Filament\Forms\Components\TranslatableTabsNoArabic;
+use CactusGalaxy\FilamentAstrotomic\TranslatableTab;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\SelectColumn;
+use Filament\Actions\CreateAction;
+use Filament\Actions\BulkActionGroup;
 use App\Filament\Resources\MessageCategory\Exports\MessageExporter;
 use App\Filament\Resources\MessageCategory\Imports\MessageImporter;
 use App\Filament\Resources\MessageCategory\Model\Message;
@@ -9,7 +20,6 @@ use App\Traits\AllColumnActionVisibility;
 use App\Traits\CommonActionButtons;
 use CactusGalaxy\FilamentAstrotomic\Resources\RelationManagers\Concerns\TranslatableRelationManager;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -23,20 +33,20 @@ class MessagesRelationManager extends RelationManager
 
     protected static ?string $model = Message::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
 
-            \App\Filament\Forms\Components\TranslatableTabsNoArabic::make()
+            TranslatableTabsNoArabic::make()
             ->columnSpan(2)
-            ->localeTabSchema(fn (\CactusGalaxy\FilamentAstrotomic\TranslatableTab $tab) => [
+            ->localeTabSchema(fn (TranslatableTab $tab) => [
 
-                \Filament\Forms\Components\Grid::make(3)->schema([
-                    \Filament\Forms\Components\Section::make()
+                Grid::make(3)->schema([
+                    Section::make()
                     ->columnSpan(2)
                     ->schema([
 
-                        Forms\Components\TextInput::make('message')
+                        TextInput::make('message')
                             ->label(__("Message"))
                             ->autofocus()
                             ->required()
@@ -47,7 +57,7 @@ class MessagesRelationManager extends RelationManager
                             ]),
 
 
-                        Forms\Components\TextInput::make($tab->makeName('translation_value'))
+                        TextInput::make($tab->makeName('translation_value'))
                             ->label(__("Translation Value[". $tab->getLocale()."]"))
                             ->autofocus()
                             ->maxLength(255)
@@ -58,11 +68,11 @@ class MessagesRelationManager extends RelationManager
 
                     ]),
 
-                    \Filament\Forms\Components\Section::make()
+                    Section::make()
                     ->columnSpan(1)
                     ->schema([
 
-                        Forms\Components\Select::make('category_id')
+                        Select::make('category_id')
                             ->label(__("Category"))
                             ->required()
                             ->relationship(name: 'category', titleAttribute: 'title')
@@ -89,11 +99,11 @@ class MessagesRelationManager extends RelationManager
             ->recordTitleAttribute('message')
             ->columns([
 
-                Tables\Columns\TextColumn::make('message')
+                TextColumn::make('message')
                 ->label(__("Message"))
                 ->searchable(),
 
-                Tables\Columns\TextColumn::make('translation_value')
+                TextColumn::make('translation_value')
                 ->label(__("Translation Value"))
                 ->searchable(isIndividual: false,
                     query: function (Builder $query, string $search): Builder {
@@ -105,7 +115,7 @@ class MessagesRelationManager extends RelationManager
                     }
                 ),
 
-                Tables\Columns\TextColumn::make('translation_value:ar')
+                TextColumn::make('translation_value:ar')
                 ->label(__("Translation Value Ar"))
                 ->searchable(isIndividual: false,
                     query: function (Builder $query, string $search): Builder {
@@ -117,7 +127,7 @@ class MessagesRelationManager extends RelationManager
                     }
                 ),
 
-                Tables\Columns\SelectColumn::make('category_id')
+                SelectColumn::make('category_id')
                     ->label(__("Category"))
                     ->options(Message::getCategoryList())
                     ->alignCenter()
@@ -133,15 +143,15 @@ class MessagesRelationManager extends RelationManager
 
                 static::renderHeaderActions(MessageImporter::class, MessageExporter::class,
                     [
-                        Tables\Actions\CreateAction::make()->createAnother(false)
+                        CreateAction::make()->createAnother(false)
                     ]
                 ),
             )
-            ->actions(
+            ->recordActions(
                 static::renderTableActions(),
             )
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make(
+            ->toolbarActions([
+                BulkActionGroup::make(
                     static::renderBulkActions(MessageExporter::class)
 
                 ),

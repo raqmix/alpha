@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\User\ResourcePages;
 
+use Filament\Schemas\Components\Tabs\Tab;
+use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\BaseResource\Pages\ListBase;
 use App\Filament\Resources\User\UserResource;
 
@@ -13,25 +15,25 @@ class ListItems extends ListBase
     {
         return
         [
-            'all' => \Filament\Resources\Components\Tab::make('All')
+            'all' => Tab::make('All')
                 ->icon('fas-globe')
                 ->badge($this->getModel()::query()->count()),
 
-            'active' => \Filament\Resources\Components\Tab::make('Active')
+            'active' => Tab::make('Active')
                 ->icon('fas-toggle-on')
-                ->modifyQueryUsing(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->where('status', $this->getModel()::STATUS_ACTIVE))
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', $this->getModel()::STATUS_ACTIVE))
                 ->badge($this->getModel()::query()->where('status', $this->getModel()::STATUS_ACTIVE)->count())
                 ->badgeColor('success'),
 
-            'inactive' => \Filament\Resources\Components\Tab::make('Inactive')
+            'inactive' => Tab::make('Inactive')
                 ->icon('fas-toggle-off')
-                ->modifyQueryUsing(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->where('status', $this->getModel()::STATUS_INACTIVE))
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', $this->getModel()::STATUS_INACTIVE))
                 ->badge($this->getModel()::query()->where('status', $this->getModel()::STATUS_INACTIVE)->count())
                 ->badgeColor('warning'),
 
-            'banned' => \Filament\Resources\Components\Tab::make('Banned')
+            'banned' => Tab::make('Banned')
                 ->icon('fas-ban')
-                ->modifyQueryUsing(fn (\Illuminate\Database\Eloquent\Builder $query) => $query->where('status', $this->getModel()::STATUS_BANNED))
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', $this->getModel()::STATUS_BANNED))
                 ->badge($this->getModel()::query()->where('status', $this->getModel()::STATUS_BANNED)->count())
                 ->badgeColor('danger'),
         ];

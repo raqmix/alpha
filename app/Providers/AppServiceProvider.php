@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use Spatie\Permission\Models\Role;
+use App\Policies\RolePolicy;
+use Filament\Resources\Pages\CreateRecord;
 use App\Filament\Resources\MicroSite\Model\MicroSite;
 use App\Models\Media\Media;
 use App\Models\User;
@@ -42,11 +45,11 @@ class AppServiceProvider extends ServiceProvider
                 return true; // Grant all abilities to super admins
             }
         });
-        Gate::policy(\Spatie\Permission\Models\Role::class, \App\Policies\RolePolicy::class);
+        Gate::policy(Role::class, RolePolicy::class);
 
         // disable create another action
-        \Filament\Resources\Pages\CreateRecord::disableCreateAnother();
-        \Filament\Actions\CreateAction::configureUsing(fn(CreateAction $action) => $action->createAnother(false));
+        CreateRecord::disableCreateAnother();
+        CreateAction::configureUsing(fn(CreateAction $action) => $action->createAnother(false));
 
 
 

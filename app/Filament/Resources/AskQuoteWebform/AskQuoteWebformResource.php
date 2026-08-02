@@ -2,16 +2,20 @@
 
 namespace App\Filament\Resources\AskQuoteWebform;
 
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use App\Classes\FilamentUtility;
+use Filament\Actions\Action;
+use Filament\Actions\ExportAction;
+use Filament\Support\Enums\Size;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\ExportBulkAction;
 use App\Filament\Resources\AskQuoteWebform\Exports\Exporter;
 use App\Filament\Resources\AskQuoteWebform\Model\AskQuoteWebform;
 use App\Filament\Resources\AskQuoteWebform\ResourcePages\ListItems;
 use CactusGalaxy\FilamentAstrotomic\Resources\Concerns\ResourceTranslatable;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Support\Enums\ActionSize;
 use Filament\Tables;
-use Filament\Tables\Actions\ExportAction;
-use Filament\Tables\Actions\ExportBulkAction;
 use Filament\Tables\Table;
 
 class AskQuoteWebformResource extends Resource
@@ -20,7 +24,7 @@ class AskQuoteWebformResource extends Resource
 
     protected static ?string $model = AskQuoteWebform::class;
 
-    protected static ?string $navigationIcon = 'heroicon-s-inbox-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-s-inbox-stack';
 
     protected static ?int $navigationSort = 2;
 
@@ -54,48 +58,48 @@ class AskQuoteWebformResource extends Resource
         return __('WebForms');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema([]);
+        return $schema->components([]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('first_name')
+                TextColumn::make('first_name')
                     ->label(__('First Name'))
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('last_name')
+                TextColumn::make('last_name')
                     ->label(__('Last Name'))
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->label(__('Email'))
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('company')
+                TextColumn::make('company')
                     ->label(__('Company'))
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('country')
+                TextColumn::make('country')
                     ->label(__('Country'))
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('phone')
+                TextColumn::make('phone')
                     ->label(__('Phone'))
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('product')
+                TextColumn::make('product')
                     ->label(__('Product Offered'))
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('quantity')
+                TextColumn::make('quantity')
                     ->label(__('Quantity'))
                     ->numeric(),
 
-                Tables\Columns\TextColumn::make('file_upload')
+                TextColumn::make('file_upload')
                     ->label(__('File'))
                     ->searchable()
                     ->formatStateUsing(fn (?string $state): string => $state ? basename($state) : '-')
@@ -104,18 +108,18 @@ class AskQuoteWebformResource extends Resource
                     ->limit(40)
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('message')
+                TextColumn::make('message')
                     ->label(__('Message'))
                     ->searchable()
                     ->limit(60),
 
-                \App\Classes\FilamentUtility::createdAtColumn(),
+                FilamentUtility::createdAtColumn(),
             ])
             ->defaultSort('id', 'desc')
             ->striped()
             ->filters([])
-            ->actions([
-                Tables\Actions\Action::make('download_file')
+            ->recordActions([
+                Action::make('download_file')
                     ->label(__('Download File'))
                     ->icon('heroicon-o-arrow-down-tray')
                     ->url(fn ($record): ?string => $record->file_upload ? asset('storage/' . $record->file_upload) : null, shouldOpenInNewTab: true)
@@ -128,10 +132,10 @@ class AskQuoteWebformResource extends Resource
                     ->color('success')
                     ->icon('heroicon-o-inbox-arrow-down')
                     ->iconButton()
-                    ->size(ActionSize::Large),
+                    ->size(Size::Large),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
                     ExportBulkAction::make()
                         ->exporter(Exporter::class)
                         ->color('success')

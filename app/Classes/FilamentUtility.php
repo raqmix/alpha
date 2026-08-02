@@ -2,21 +2,24 @@
 
 namespace App\Classes;
 
+use Filament\Actions\Action;
+use Illuminate\Support\HtmlString;
+use Filament\Schemas\Components\Actions;
+use Carbon\Carbon;
+use Filament\Schemas\Components\Section;
+use Livewire\Component;
+use Filament\Schemas\Schema;
 use App\Classes\CustomPackage\CustomComponent\CustomCuratorPicker;
 use App\Filament\Resources\Seo\Model\Seo;
 use Awcodes\Curator\PathGenerators\DatePathGenerator;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Form;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Request;
@@ -50,7 +53,7 @@ class FilamentUtility
             ->modalWidth('5xl')
             ->modalContent(function ($record) use($frontroute, $tab) {
                 $previewUrl = route($frontroute, ["locale"=>$tab->getLocale(), "slug"=>$record->translate($tab->getLocale())->slug]);
-                return new \Illuminate\Support\HtmlString(
+                return new HtmlString(
                     '<iframe src="' . $previewUrl . '"
                             width="100%"
                             height="600"
@@ -94,7 +97,7 @@ class FilamentUtility
                 ->label(__("Published At"))
                 ->searchable()
                 ->alignCenter()
-                ->formatStateUsing(fn ($state) => \Carbon\Carbon::parse($state)->setTimezone(setting("general.time_zone"))->format(setting("general.date_format") .' '. setting("general.time_format")));
+                ->formatStateUsing(fn ($state) => Carbon::parse($state)->setTimezone(setting("general.time_zone"))->format(setting("general.date_format") .' '. setting("general.time_format")));
     }
 
     public static function statusColumn($model): ToggleColumn
@@ -125,7 +128,7 @@ class FilamentUtility
                 ->label(__("Created At"))
                 ->searchable()
                 ->alignCenter()
-                ->formatStateUsing(fn ($state) => \Carbon\Carbon::parse($state)->setTimezone(setting("general.time_zone"))->format(setting("general.date_format") .' '. setting("general.time_format")));
+                ->formatStateUsing(fn ($state) => Carbon::parse($state)->setTimezone(setting("general.time_zone"))->format(setting("general.date_format") .' '. setting("general.time_format")));
     }
 
     public static function updatedAtColumn(): TextColumn
@@ -134,7 +137,7 @@ class FilamentUtility
                 ->label(__("Updated At"))
                 ->searchable()
                 ->alignCenter()
-                ->formatStateUsing(fn ($state) => \Carbon\Carbon::parse($state)->setTimezone(setting("general.time_zone"))->format(setting("general.date_format") .' '. setting("general.time_format")));
+                ->formatStateUsing(fn ($state) => Carbon::parse($state)->setTimezone(setting("general.time_zone"))->format(setting("general.date_format") .' '. setting("general.time_format")));
     }
 
 
@@ -376,7 +379,7 @@ class FilamentUtility
         {
             return
 
-            \Filament\Forms\Components\Select::make($inputName)
+            Select::make($inputName)
                 ->label(__($inputLabel))
                 ->required($required)
                 ->multiple($isMultiple)
@@ -424,7 +427,7 @@ class FilamentUtility
             ->columnSpanFull()
             ->deleteAction(
                 fn (Action $action) => $action->requiresConfirmation()
-                ->action(function (array $arguments, Repeater $component, \Livewire\Component $livewire): void {
+                ->action(function (array $arguments, Repeater $component, Component $livewire): void {
                     $records = $component->getCachedExistingRecords();
                     $record = $records[$arguments['item']] ?? null;
                     if($record){
@@ -438,17 +441,17 @@ class FilamentUtility
 
                 Action::make('toggle_status')
                 ->label(__('Toggle Status'))
-                ->icon(function (array $arguments, Repeater $component, \Livewire\Component $livewire) use($repeaterName) {
+                ->icon(function (array $arguments, Repeater $component, Component $livewire) use($repeaterName) {
                     $records = $component->getCachedExistingRecords();
                     $record = $records[$arguments['item']] ?? null;
                 return $record->status? 'fas-toggle-on' : 'fas-toggle-off';
                 })
-                ->color(function (array $arguments, Repeater $component, \Livewire\Component $livewire) use($repeaterName) {
+                ->color(function (array $arguments, Repeater $component, Component $livewire) use($repeaterName) {
                     $records = $component->getCachedExistingRecords();
                     $record = $records[$arguments['item']] ?? null;
                 return $record->status? 'success' : 'warning';
                 })
-                ->action(function (array $arguments, Repeater $component, \Livewire\Component $livewire) use($repeaterName) {
+                ->action(function (array $arguments, Repeater $component, Component $livewire) use($repeaterName) {
                     $records = $component->getCachedExistingRecords();
                     $record = $records[$arguments['item']] ?? null;
 
@@ -468,7 +471,7 @@ class FilamentUtility
                 ->icon('heroicon-m-pencil-square')
                 ->modalHeading(__('Edit Container'))
                 ->modalWidth('5xl')
-                ->form(fn (Form $form, $get) => $resource::$formPopup($form, $formParameters, $get))
+                ->schema(fn (Schema $schema, $get) => $resource::$formPopup($schema, $formParameters, $get))
                 ->fillForm(function (array $arguments, Repeater $component) {
 
                     $records = $component->getCachedExistingRecords();
@@ -482,7 +485,7 @@ class FilamentUtility
 
                     return $data;
                 })
-                ->action(function ($data, $record, array $arguments, Repeater $component, \Livewire\Component $livewire) use($repeaterName): void {
+                ->action(function ($data, $record, array $arguments, Repeater $component, Component $livewire) use($repeaterName): void {
                     $records = $component->getCachedExistingRecords();
                     $record = $records[$arguments['item']] ?? null;
                     $record->update($data);
@@ -507,7 +510,7 @@ class FilamentUtility
                 ->label(__($buttonLabel))
                 ->modalHeading(__($buttonLabel))
                 ->modalWidth('5xl')
-                ->form(fn (Form $form, $get) => $resource::$formPopup($form, $formParameters, $get  ))
+                ->schema(fn (Schema $schema, $get) => $resource::$formPopup($schema, $formParameters, $get  ))
                 ->action(function ($data, $livewire, $record) use($model, $repeaterName): void {
                     $model::create($data);
                     if (method_exists($livewire, 'refreshFormData')) {
@@ -575,7 +578,7 @@ class FilamentUtility
                 ->columnSpanFull()
                 ->deleteAction(
                     fn(Action $action) => $action->requiresConfirmation()
-                        ->action(function (array $arguments, Repeater $component, \Livewire\Component $livewire): void {
+                        ->action(function (array $arguments, Repeater $component, Component $livewire): void {
                             $records = $component->getCachedExistingRecords();
                             $record = $records[$arguments['item']] ?? null;
                             if ($record) {
@@ -591,7 +594,7 @@ class FilamentUtility
                         ->icon('heroicon-m-pencil-square')
                         ->modalHeading(__('Edit Container'))
                         ->modalWidth('5xl')
-                        ->form(fn(Form $form, $get) => $resource::$formPopup($form, $formParameters, $get))
+                        ->schema(fn(Schema $schema, $get) => $resource::$formPopup($schema, $formParameters, $get))
                         ->fillForm(function (array $arguments, Repeater $component) {
 
                             $records = $component->getCachedExistingRecords();
@@ -601,7 +604,7 @@ class FilamentUtility
 
                             return $data;
                         })
-                        ->action(function ($data, $record, array $arguments, Repeater $component, \Livewire\Component $livewire) use ($repeaterName): void {
+                        ->action(function ($data, $record, array $arguments, Repeater $component, Component $livewire) use ($repeaterName): void {
                             $records = $component->getCachedExistingRecords();
                             $record = $records[$arguments['item']] ?? null;
                             $record->update($data);
@@ -632,7 +635,7 @@ class FilamentUtility
                 ->columnSpanFull()
                 ->deleteAction(
                     fn(Action $action) => $action->requiresConfirmation()
-                        ->action(function (array $arguments, Repeater $component, \Livewire\Component $livewire): void {
+                        ->action(function (array $arguments, Repeater $component, Component $livewire): void {
                             $records = $component->getCachedExistingRecords();
                             $record = $records[$arguments['item']] ?? null;
                             if ($record) {
@@ -648,7 +651,7 @@ class FilamentUtility
                         ->icon('heroicon-m-pencil-square')
                         ->modalHeading(__('Edit Container'))
                         ->modalWidth('5xl')
-                        ->form(fn(Form $form, $get) => $resource::$formPopup($form, $formParameters, $get))
+                        ->schema(fn(Schema $schema, $get) => $resource::$formPopup($schema, $formParameters, $get))
                         ->fillForm(function (array $arguments, Repeater $component) {
 
                             $records = $component->getCachedExistingRecords();
@@ -658,7 +661,7 @@ class FilamentUtility
 
                             return $data;
                         })
-                        ->action(function ($data, $record, array $arguments, Repeater $component, \Livewire\Component $livewire) use ($repeaterName): void {
+                        ->action(function ($data, $record, array $arguments, Repeater $component, Component $livewire) use ($repeaterName): void {
                             $records = $component->getCachedExistingRecords();
                             $record = $records[$arguments['item']] ?? null;
                             $record->update($data);

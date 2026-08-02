@@ -2,6 +2,20 @@
 
 namespace App\Filament\Resources\Blog;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
 use App\Classes\CustomPackage\CustomComponent\CustomCuratorPicker;
 use App\Classes\FilamentUtility;
 use App\Filament\Resources\Blog\Model\Blog;
@@ -18,10 +32,7 @@ use Awcodes\Curator\Components\Tables\CuratorColumn;
 use Awcodes\Curator\PathGenerators\DatePathGenerator;
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -36,7 +47,7 @@ class BlogResource extends Resource
 
     protected static ?string $model = Blog::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-newspaper';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-newspaper';
 
 
     public static function getNavigationBadge(): ?string
@@ -77,10 +88,10 @@ class BlogResource extends Resource
 
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
 
-        return $form->schema([
+        return $schema->components([
 
             TranslatableTabsNoArabic::make()
                 ->columnSpan(2)
@@ -91,7 +102,7 @@ class BlogResource extends Resource
                             ->columnSpan(2)
                             ->schema([
 
-                                Forms\Components\TextInput::make($tab->makeName('title'))
+                                TextInput::make($tab->makeName('title'))
                                     ->label(__("Title[" . $tab->getLocale() . "]"))
                                     ->required($tab->getLocale() === 'en')
                                     ->maxLength(255)
@@ -100,7 +111,7 @@ class BlogResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\TextInput::make('slug')
+                                TextInput::make('slug')
                                     ->label(__("Slug"))
                                     ->unique(ignoreRecord: true)
                                     ->helperText('Generated Automatically')
@@ -160,7 +171,7 @@ class BlogResource extends Resource
                             ->columnSpan(1)
                             ->schema([
 
-                                Forms\Components\DatePicker::make('published_at')
+                                DatePicker::make('published_at')
                                     ->label(__("Published At"))
                                     ->rules(['date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'])
                                     ->default(Carbon::now())
@@ -171,7 +182,7 @@ class BlogResource extends Resource
                                     ]),
 
 
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label(__("Status"))
                                     ->required()
                                     ->options(self::$model::getStatusList())
@@ -184,14 +195,14 @@ class BlogResource extends Resource
                                     ]),
 
 
-                                Forms\Components\Toggle::make('is_campaign')
+                                Toggle::make('is_campaign')
                                     ->label(__("PROMOTE TO HOMEPAGE"))
                                     ->default(false)
                                     ->required()
                                     ->inline(false),
 
 
-                                Forms\Components\TextInput::make('weight_order')
+                                TextInput::make('weight_order')
                                     ->label(__("Weight Order"))
                                     ->required()
                                     ->integer()
@@ -201,14 +212,14 @@ class BlogResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\Select::make('category_id')
+                                Select::make('category_id')
                                     ->label(__("Category"))
                                     ->options(Blog::getBlogCategoryList())
                                     ->native(false)
                                     ->searchable(),
 
                                     // reading_time
-                                Forms\Components\TextInput::make('reading_time')
+                                TextInput::make('reading_time')
                                     ->label(__("Reading Time (Minutes)"))
                                     ->integer()
                                     ->default(5)
@@ -231,7 +242,7 @@ class BlogResource extends Resource
         return $table
             ->columns([
 
-                Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label(__("title"))
                     ->searchable(
                         isIndividual: false,
@@ -245,7 +256,7 @@ class BlogResource extends Resource
                     ),
                 CuratorColumn::make("image_id")->label('Image'),
 
-                Tables\Columns\TextColumn::make('category.title')
+                TextColumn::make('category.title')
                     ->label(__("Category"))
                     ->sortable(),
 
@@ -266,12 +277,12 @@ class BlogResource extends Resource
                 // \App\Classes\FilamentUtility::publishedAtColumn(),
 
 
-                \App\Classes\FilamentUtility::statusColumn(static::$model),
-                \App\Classes\FilamentUtility::createdAtColumn(),
-                \App\Classes\FilamentUtility::updatedAtColumn(),
+                FilamentUtility::statusColumn(static::$model),
+                FilamentUtility::createdAtColumn(),
+                FilamentUtility::updatedAtColumn(),
 
-                \App\Classes\FilamentUtility::creatorColumn(),
-                \App\Classes\FilamentUtility::updaterColumn(),
+                FilamentUtility::creatorColumn(),
+                FilamentUtility::updaterColumn(),
 
 
             ])
@@ -284,37 +295,37 @@ class BlogResource extends Resource
 
             ->filters(
                 static::renderFilterActions([
-                    Tables\Filters\SelectFilter::make('category_id')
+                    SelectFilter::make('category_id')
                         ->label(__("Category"))
                         ->options(Blog::getBlogCategoryList()),
                 ]),
             )
 
-            ->actions(
+            ->recordActions(
                 static::renderTableActions(),
             )
 
             ->headerActions([])
 
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('publish')
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    BulkAction::make('publish')
                         ->action(fn (Collection $records) => static::BulkActivate($records))
                         ->deselectRecordsAfterCompletion()
                         ->requiresConfirmation()
                         ->color('success')
                         ->icon('fas-toggle-on')
                         ->visible(static::toggleColumnVisibility()),
-                    Tables\Actions\BulkAction::make('pending')
+                    BulkAction::make('pending')
                         ->action(fn (Collection $records) => static::BulkDeactivate($records))
                         ->deselectRecordsAfterCompletion()
                         ->requiresConfirmation()
                         ->color('warning')
                         ->icon('fas-toggle-off')
                         ->visible(static::toggleColumnVisibility()),
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ]);
     }

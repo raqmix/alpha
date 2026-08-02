@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\MenuLink\ResourcePages;
 
+use SolutionForest\FilamentTree\Actions\EditAction;
+use SolutionForest\FilamentTree\Actions\DeleteAction;
 use App\Filament\Resources\MenuLink\MenuLinkResource;
 use App\Traits\HasParentResource;
 use CactusGalaxy\FilamentAstrotomic\Resources\Pages\Record\EditTranslatable;
@@ -47,8 +49,8 @@ class MenuLinkTree extends BasePage
     protected function getTreeActions(): array
     {
         return [
-            Actions\EditAction::make(),
-            Actions\DeleteAction::make(),
+            EditAction::make(),
+            DeleteAction::make(),
         ];
     }
 

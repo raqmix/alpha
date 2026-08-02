@@ -2,6 +2,17 @@
 
 namespace App\Filament\Resources\District;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\SelectColumn;
+use App\Classes\FilamentUtility;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\BulkActionGroup;
 use App\Filament\Resources\City\CityResource;
 use App\Filament\Forms\Components\TranslatableTabsNoArabic;
 use CactusGalaxy\FilamentAstrotomic\Resources\Concerns\ResourceTranslatable;
@@ -19,9 +30,6 @@ use App\Traits\CommonActionButtons;
 
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -34,7 +42,7 @@ class DistrictResource extends Resource
 
     protected static ?string $model = District::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-office';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-building-office';
 
 
     public static function getNavigationBadge(): ?string
@@ -83,10 +91,10 @@ class DistrictResource extends Resource
 
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
 
-        return $form->schema([
+        return $schema->components([
 
             TranslatableTabsNoArabic::make()
                 ->columnSpan(2)
@@ -97,7 +105,7 @@ class DistrictResource extends Resource
                             ->columnSpan(2)
                             ->schema([
 
-                                Forms\Components\TextInput::make($tab->makeName('title'))
+                                TextInput::make($tab->makeName('title'))
                                     ->label(__("Title[" . $tab->getLocale() . "]"))
                                     ->required()
                                     ->maxLength(255)
@@ -106,7 +114,7 @@ class DistrictResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\TextInput::make('slug')
+                                TextInput::make('slug')
                                     ->label(__("Slug"))
                                     ->unique(ignoreRecord: true)
                                     ->helperText('Generated Automatically')
@@ -119,14 +127,14 @@ class DistrictResource extends Resource
 
 
 
-                                \Filament\Forms\Components\Select::make('city_id')
+                                Select::make('city_id')
                                     ->label(__("City"))
                                     ->required()
                                     ->relationship('city', 'title')
                                     ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->title}")
                                     ->native(false)
                                     ->createOptionModalHeading('Create')
-                                    ->createOptionForm(fn(Form $form) => CityResource::form($form))
+                                    ->createOptionForm(fn(Schema $schema) => CityResource::form($schema))
                                     ->notRegex('/<[^b][^r][^>]*>/')
                                     ->validationMessages([
                                         'not_regex' => 'HTML is invalid',
@@ -139,7 +147,7 @@ class DistrictResource extends Resource
                             ->columnSpan(1)
                             ->schema([
 
-                                Forms\Components\DatePicker::make('published_at')
+                                DatePicker::make('published_at')
                                     ->label(__("Published At"))
                                     ->rules(['date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'])
                                     ->default(Carbon::now())
@@ -149,7 +157,7 @@ class DistrictResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label(__("Status"))
                                     ->required()
                                     ->options(self::$model::getStatusList())
@@ -162,7 +170,7 @@ class DistrictResource extends Resource
                                     ]),
 
 
-                                Forms\Components\TextInput::make('weight_order')
+                                TextInput::make('weight_order')
                                     ->label(__("Weight Order"))
                                     ->required()
                                     ->integer()
@@ -185,7 +193,7 @@ class DistrictResource extends Resource
         return $table
             ->columns([
 
-                Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label(__("title"))
                     ->searchable(
                         isIndividual: false,
@@ -198,7 +206,7 @@ class DistrictResource extends Resource
                         }
                     ),
 
-                Tables\Columns\TextColumn::make('title:ar')
+                TextColumn::make('title:ar')
                     ->label(__("title Ar"))
                     ->searchable(
                         isIndividual: false,
@@ -211,22 +219,22 @@ class DistrictResource extends Resource
                         }
                     ),
 
-                Tables\Columns\SelectColumn::make('city_id')
+                SelectColumn::make('city_id')
                     ->label(__("City"))
                     ->options(District::getCityList())
                     ->alignCenter()
                     ->selectablePlaceholder(false),
 
 
-                \App\Classes\FilamentUtility::publishedAtColumn(),
+                FilamentUtility::publishedAtColumn(),
 
 
-                \App\Classes\FilamentUtility::statusColumn(static::$model),
-                \App\Classes\FilamentUtility::createdAtColumn(),
-                \App\Classes\FilamentUtility::updatedAtColumn(),
+                FilamentUtility::statusColumn(static::$model),
+                FilamentUtility::createdAtColumn(),
+                FilamentUtility::updatedAtColumn(),
 
-                \App\Classes\FilamentUtility::creatorColumn(),
-                \App\Classes\FilamentUtility::updaterColumn(),
+                FilamentUtility::creatorColumn(),
+                FilamentUtility::updaterColumn(),
 
             ])
             ->defaultSort(function (Builder $query): Builder {
@@ -238,13 +246,13 @@ class DistrictResource extends Resource
 
             ->filters(
                 static::renderFilterActions([
-                    Tables\Filters\SelectFilter::make('city_id')
+                    SelectFilter::make('city_id')
                         ->label(__("City"))
                         ->options(District::getCityList()),
                 ]),
             )
 
-            ->actions(
+            ->recordActions(
                 static::renderTableActions(),
             )
 
@@ -254,8 +262,8 @@ class DistrictResource extends Resource
                 static::renderHeaderActions(Importer::class, Exporter::class),
 
             )
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make(
+            ->toolbarActions([
+                BulkActionGroup::make(
                     static::renderBulkActions(Exporter::class)
 
                 ),

@@ -2,6 +2,16 @@
 
 namespace App\Filament\Resources\VideoGallery;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\SelectColumn;
+use App\Classes\FilamentUtility;
+use Filament\Actions\BulkActionGroup;
 use App\Classes\CustomPackage\CustomComponent\CustomCuratorPicker;
 use App\Filament\Resources\VideoGallery\Exports\Exporter;
 use App\Filament\Resources\VideoGallery\Imports\Importer;
@@ -20,9 +30,6 @@ use Awcodes\Curator\Components\Tables\CuratorColumn;
 use Awcodes\Curator\PathGenerators\DatePathGenerator;
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -35,7 +42,7 @@ class VideoGalleryResource extends Resource
 
     protected static ?string $model = VideoGallery::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-newspaper';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-newspaper';
 
 
     public static function getNavigationBadge(): ?string
@@ -84,10 +91,10 @@ class VideoGalleryResource extends Resource
 
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
 
-        return $form->schema([
+        return $schema->components([
 
             TranslatableTabsNoArabic::make()
                 ->columnSpan(2)
@@ -98,7 +105,7 @@ class VideoGalleryResource extends Resource
                             ->columnSpan(2)
                             ->schema([
 
-                                Forms\Components\TextInput::make($tab->makeName('title'))
+                                TextInput::make($tab->makeName('title'))
                                     ->label(__("Title[" . $tab->getLocale() . "]"))
                                     ->required()
                                     ->maxLength(255)
@@ -107,7 +114,7 @@ class VideoGalleryResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\TextInput::make($tab->makeName('url'))
+                                TextInput::make($tab->makeName('url'))
                                     ->label(__("URL[" . $tab->getLocale() . "]"))
                                     ->required()
                                     ->maxLength(255)
@@ -116,7 +123,7 @@ class VideoGalleryResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\TextInput::make('slug')
+                                TextInput::make('slug')
                                     ->label(__("Slug"))
                                     ->unique(ignoreRecord: true)
                                     ->helperText('Generated Automatically')
@@ -152,7 +159,7 @@ class VideoGalleryResource extends Resource
                             ->columnSpan(1)
                             ->schema([
 
-                                Forms\Components\DatePicker::make('published_at')
+                                DatePicker::make('published_at')
                                     ->label(__("Published At"))
                                     ->rules(['date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'])
                                     ->default(Carbon::now())
@@ -162,7 +169,7 @@ class VideoGalleryResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label(__("Status"))
                                     ->required()
                                     ->options(self::$model::getStatusList())
@@ -175,7 +182,7 @@ class VideoGalleryResource extends Resource
                                     ]),
 
 
-                                Forms\Components\TextInput::make('weight_order')
+                                TextInput::make('weight_order')
                                     ->label(__("Weight Order"))
                                     ->required()
                                     ->integer()
@@ -185,7 +192,7 @@ class VideoGalleryResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                \Filament\Forms\Components\Select::make('category_id')
+                                Select::make('category_id')
                                     ->label(__("Category"))
                                     ->required()
                                     ->options(VideoGallery::getVideoCategoryList())
@@ -209,7 +216,7 @@ class VideoGalleryResource extends Resource
             ->columns([
                 CuratorColumn::make("cover_image_id")->label('Image'),
 
-                Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label(__("title"))
                     ->searchable(
                         isIndividual: false,
@@ -236,20 +243,20 @@ class VideoGalleryResource extends Resource
                 //     ),
 
 
-                Tables\Columns\SelectColumn::make('category_id')
+                SelectColumn::make('category_id')
                     ->label(__("Category"))
                     ->options(VideoGallery::getVideoCategoryList())
                     ->alignCenter()
                     ->selectablePlaceholder(false),
-                \App\Classes\FilamentUtility::publishedAtColumn(),
+                FilamentUtility::publishedAtColumn(),
 
 
-                \App\Classes\FilamentUtility::statusColumn(static::$model),
-                \App\Classes\FilamentUtility::createdAtColumn(),
-                \App\Classes\FilamentUtility::updatedAtColumn(),
+                FilamentUtility::statusColumn(static::$model),
+                FilamentUtility::createdAtColumn(),
+                FilamentUtility::updatedAtColumn(),
 
-                \App\Classes\FilamentUtility::creatorColumn(),
-                \App\Classes\FilamentUtility::updaterColumn(),
+                FilamentUtility::creatorColumn(),
+                FilamentUtility::updaterColumn(),
 
 
             ])
@@ -264,7 +271,7 @@ class VideoGalleryResource extends Resource
                 static::renderFilterActions(),
             )
 
-            ->actions(
+            ->recordActions(
                 static::renderTableActions(),
             )
 
@@ -274,8 +281,8 @@ class VideoGalleryResource extends Resource
 
             )
 
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make(
+            ->toolbarActions([
+                BulkActionGroup::make(
                     static::renderBulkActions(Exporter::class)
 
                 ),

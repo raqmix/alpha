@@ -2,14 +2,17 @@
 
 namespace App\Filament\Resources\ContactUsWebform;
 
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use App\Classes\FilamentUtility;
+use Filament\Actions\ExportAction;
+use Filament\Support\Enums\Size;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\ExportBulkAction;
 use App\Filament\Resources\ContactUsWebformResource\Pages;
 
 use CactusGalaxy\FilamentAstrotomic\Resources\Concerns\ResourceTranslatable;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Support\Enums\ActionSize;
-use Filament\Tables\Actions\ExportBulkAction;
-use Filament\Tables\Actions\ExportAction;
 use App\Filament\Exports\ContactUsWebformExporter;
 use App\Filament\Resources\ContactUsWebform\Exports\Exporter;
 use App\Filament\Resources\ContactUsWebform\Model\ContactUsWebform;
@@ -24,7 +27,7 @@ class ContactUsWebformResource extends Resource
 
     protected static ?string $model = ContactUsWebform::class;
 
-    protected static ?string $navigationIcon = 'heroicon-s-phone';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-s-phone';
 
     public static function getNavigationBadge(): ?string
     {
@@ -62,10 +65,10 @@ class ContactUsWebformResource extends Resource
 
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
 
-        return $form->schema([]);
+        return $schema->components([]);
     }
 
     public static function table(Table $table): Table
@@ -77,36 +80,36 @@ class ContactUsWebformResource extends Resource
 
 
 
-                Tables\Columns\TextColumn::make('first_name')
+                TextColumn::make('first_name')
                     ->label(__("First Name"))
                     ->searchable(),
-                Tables\Columns\TextColumn::make('last_name')
+                TextColumn::make('last_name')
                     ->label(__("Last Name"))
                     ->searchable(),
 
 
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->label(__("email"))
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('phone')
+                TextColumn::make('phone')
                     ->label(__("phone"))
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('company')
+                TextColumn::make('company')
                     ->label(__("Company"))
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('product')
+                TextColumn::make('product')
                     ->label(__("Product of Interest"))
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('message')
+                TextColumn::make('message')
                     ->label(__("message"))
                     ->searchable(),
 
 
-                \App\Classes\FilamentUtility::createdAtColumn(),
+                FilamentUtility::createdAtColumn(),
 
 
 
@@ -115,7 +118,7 @@ class ContactUsWebformResource extends Resource
             ->striped()
             ->filters([])
 
-            ->actions([
+            ->recordActions([
 
             ])
             ->headerActions([
@@ -126,11 +129,11 @@ class ContactUsWebformResource extends Resource
                     ->color("success")
                     ->icon("heroicon-o-inbox-arrow-down")
                     ->iconButton()
-                    ->size(ActionSize::Large),
+                    ->size(Size::Large),
 
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+            ->toolbarActions([
+                BulkActionGroup::make([
 
                     ExportBulkAction::make()
                         ->exporter(Exporter::class)

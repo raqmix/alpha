@@ -2,6 +2,7 @@
 
 namespace App\Classes;
 
+use Filament\Schemas\Schema;
 use App\Filament\Resources\Accreditation\AccreditationResource;
 use App\Filament\Resources\Accreditation\Model\Accreditation;
 use App\Filament\Resources\PatientReview\Model\PatientReview;
@@ -9,7 +10,6 @@ use App\Filament\Resources\PatientReview\PatientReviewResource;
 use App\Filament\Resources\VideoGallery\Model\VideoGallery;
 use App\Filament\Resources\VideoGallery\VideoGalleryResource;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Form;
 use Illuminate\Database\Eloquent\Model;
 
 class CurrentSiteUtility
@@ -26,7 +26,7 @@ class CurrentSiteUtility
                 ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->title}")
                 ->native(false)
                 ->createOptionModalHeading('Create')
-                ->createOptionForm(fn(Form $form) => VideoGalleryResource::form($form))
+                ->createOptionForm(fn(Schema $schema) => VideoGalleryResource::form($schema))
                 ->createOptionUsing(function (array $data) {
 
                     $optionRecord = VideoGallery::create($data);
@@ -52,7 +52,7 @@ class CurrentSiteUtility
                 ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->title}")
                 ->native(false)
                 ->createOptionModalHeading('Create')
-                ->createOptionForm(fn(Form $form) => PatientReviewResource::form($form))
+                ->createOptionForm(fn(Schema $schema) => PatientReviewResource::form($schema))
                 ->createOptionUsing(function (array $data) {
 
                     $optionRecord = PatientReview::create($data);
@@ -78,7 +78,7 @@ class CurrentSiteUtility
                 ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->title}")
                 ->native(false)
                 ->createOptionModalHeading('Create')
-                ->createOptionForm(fn(Form $form) => AccreditationResource::form($form))
+                ->createOptionForm(fn(Schema $schema) => AccreditationResource::form($schema))
                 ->createOptionUsing(function (array $data) {
 
                     $optionRecord = Accreditation::create($data);

@@ -2,6 +2,7 @@
 
 namespace App\Models\Base;
 
+use Normalizer;
 use App\Filament\Resources\MicroSite\Model\MicroSite;
 use App\Models\User;
 use Carbon\Carbon;
@@ -157,7 +158,7 @@ class BaseModel extends Model implements Auditable
 
 
             // Remove Arabic Tashkeel (Diacritics)
-            $slug = preg_replace('/\p{M}/u', '', \Normalizer::normalize($slug, \Normalizer::FORM_D));
+            $slug = preg_replace('/\p{M}/u', '', Normalizer::normalize($slug, Normalizer::FORM_D));
 
             // Lower case everything
             // using mb_strtolower() function is important for non-Latin UTF-8 string | more info: http://goo.gl/QL2tzK

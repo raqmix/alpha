@@ -2,6 +2,15 @@
 
 namespace App\Filament\Resources\Menu;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use App\Classes\FilamentUtility;
+use Filament\Actions\Action;
 use App\Filament\Resources\DropdownList\DropdownListResource;
 use App\Filament\Resources\DropdownList\Model\DropdownList;
 use App\Filament\Resources\Menu\Model\Menu;
@@ -18,16 +27,12 @@ use CactusGalaxy\FilamentAstrotomic\Resources\Concerns\ResourceTranslatable;
 use CactusGalaxy\FilamentAstrotomic\TranslatableTab;
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
-use Filament\Tables\Actions\Action;
 
 
 class MenuResource extends Resource
@@ -36,7 +41,7 @@ class MenuResource extends Resource
 
     protected static ?string $model = Menu::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-queue-list';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-queue-list';
 
     public static function getNavigationBadge(): ?string
     {
@@ -96,10 +101,10 @@ class MenuResource extends Resource
 
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
 
-        return $form->schema([
+        return $schema->components([
 
             TranslatableTabsNoArabic::make()
                 ->columnSpan(2)
@@ -110,7 +115,7 @@ class MenuResource extends Resource
                             ->columnSpan(2)
                             ->schema([
 
-                                Forms\Components\TextInput::make($tab->makeName('title'))
+                                TextInput::make($tab->makeName('title'))
                                     ->label(__("Title[" . $tab->getLocale() . "]"))
                                     ->required($tab->getLocale() === 'en')
                                     ->maxLength(255)
@@ -128,7 +133,7 @@ class MenuResource extends Resource
                             ->columnSpan(1)
                             ->schema([
 
-                                Forms\Components\DatePicker::make('published_at')
+                                DatePicker::make('published_at')
                                     ->label(__("Published At"))
                                     ->rules(['date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'])
                                     ->default(Carbon::now())
@@ -138,7 +143,7 @@ class MenuResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label(__("Status"))
                                     ->required()
                                     ->options(Menu::getStatusList())
@@ -172,7 +177,7 @@ class MenuResource extends Resource
                                 //     ]),
 
 
-                                Forms\Components\TextInput::make('weight_order')
+                                TextInput::make('weight_order')
                                     ->label(__("Weight Order"))
                                     ->required()
                                     ->integer()
@@ -197,7 +202,7 @@ class MenuResource extends Resource
             ->columns([
 
 
-                Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label(__("title"))
                     ->searchable(
                         isIndividual: false,
@@ -221,12 +226,12 @@ class MenuResource extends Resource
                 //     ->alignCenter()
                 //     ->selectablePlaceholder(false),
 
-                \App\Classes\FilamentUtility::statusColumn(static::$model),
-                \App\Classes\FilamentUtility::createdAtColumn(),
-                \App\Classes\FilamentUtility::updatedAtColumn(),
+                FilamentUtility::statusColumn(static::$model),
+                FilamentUtility::createdAtColumn(),
+                FilamentUtility::updatedAtColumn(),
 
-                \App\Classes\FilamentUtility::creatorColumn(),
-                \App\Classes\FilamentUtility::updaterColumn(),
+                FilamentUtility::creatorColumn(),
+                FilamentUtility::updaterColumn(),
 
 
 
@@ -246,7 +251,7 @@ class MenuResource extends Resource
             //     ]),
             // )
 
-            ->actions([
+            ->recordActions([
                 Action::make('Menu Link')
                     ->url(
                         fn(Menu $record): string => static::getUrl('menu-links.menu-link-list', [
@@ -254,7 +259,7 @@ class MenuResource extends Resource
                         ])
                     ),
             ])
-            ->bulkActions([]);
+            ->toolbarActions([]);
     }
 
     public static function getRelations(): array

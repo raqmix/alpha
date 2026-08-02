@@ -2,12 +2,14 @@
 
 namespace App\Filament\Pages\Settings;
 
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Section;
 use App\Classes\CustomPackage\CustomComponent\CustomCuratorPicker;
 use App\Models\Setting\Setting;
 use Awcodes\Curator\PathGenerators\DatePathGenerator;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Closure;
-use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
 use Outerweb\FilamentSettings\Filament\Pages\Settings as BaseSettings;
 
@@ -15,7 +17,6 @@ use App\Filament\Forms\Components\TranslatableTabsNoArabic;
 use CactusGalaxy\FilamentAstrotomic\TranslatableTab;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Illuminate\Support\HtmlString;
 use Filament\Support\Exceptions\Halt;
@@ -51,7 +52,7 @@ class AllSetting extends BaseSettings
 
                     Tabs::make('Settings')
                         ->schema([
-                            Tabs\Tab::make('General')
+                            Tab::make('General')
                                 ->schema([
 
                                     TextInput::make($tab->makeName('general.title'))
@@ -295,7 +296,7 @@ class AllSetting extends BaseSettings
 
 
                                 ]),
-                            Tabs\Tab::make('Site')
+                            Tab::make('Site')
                                 ->schema([
                                     Section::make('Logo, Favicon and Main Color')
                                         ->collapsed()
@@ -486,7 +487,7 @@ class AllSetting extends BaseSettings
 
 
             $fields = collect($this->form->getFlatFields(true));
-            $fieldsWithNestedFields = $fields->filter(fn(Field $field) => count($field->getChildComponents()) > 0);
+            $fieldsWithNestedFields = $fields->filter(fn(Field $field) => count($field->getDefaultChildComponents()) > 0);
 
             $fieldsWithNestedFields->each(function (Field $fieldWithNestedFields, string $fieldWithNestedFieldsKey) use (&$fields) {
                 $fields = $fields->reject(function (Field $field, string $fieldKey) use ($fieldWithNestedFields, $fieldWithNestedFieldsKey) {

@@ -2,6 +2,8 @@
 
 namespace App\Helper;
 
+use Exception;
+use Imagick;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 
@@ -12,19 +14,19 @@ class RemoveBgHelper
     {
         try {
             if (!Storage::disk($disk)->exists($path)) {
-                throw new \Exception("File not found at path: {$path}");
+                throw new Exception("File not found at path: {$path}");
             }
 
             $absolutePath = Storage::disk($disk)->path($path);
             $image = Image::make($absolutePath);
 
-            if (!($image->getCore() instanceof \Imagick)) {
-                throw new \Exception('Imagick driver not being used. Check your Intervention Image configuration.');
+            if (!($image->getCore() instanceof Imagick)) {
+                throw new Exception('Imagick driver not being used. Check your Intervention Image configuration.');
             }
 
             $imagick = $image->getCore();
             $imagick->setImageFormat('png');
-            $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_ACTIVATE);
+            $imagick->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
 
             $backgroundColor = $imagick->getImagePixelColor(0, 0);
 
@@ -35,7 +37,7 @@ class RemoveBgHelper
                 false
             );
 
-            $imagick->mergeImageLayers(\Imagick::LAYERMETHOD_OPTIMIZE);
+            $imagick->mergeImageLayers(Imagick::LAYERMETHOD_OPTIMIZE);
 
             $filename = preg_replace('/\.[a-z]+$/i', '.png', basename($path));
             $newPath = $outputDir ? rtrim($outputDir, '/') . '/' . $filename : preg_replace('/\.[a-z]+$/i', '.png', $path);
@@ -47,7 +49,7 @@ class RemoveBgHelper
                 'url' => Storage::disk($disk)->url($newPath),
             ];
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [
                 'error' => $e->getMessage(),
                 'imagick_installed' => extension_loaded('imagick'),

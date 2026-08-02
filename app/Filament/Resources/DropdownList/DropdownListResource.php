@@ -2,15 +2,25 @@
 
 namespace App\Filament\Resources\DropdownList;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\SelectColumn;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
 use App\Classes\FilamentUtility;
 use App\Filament\Forms\Components\TranslatableTabsNoArabic;
 use CactusGalaxy\FilamentAstrotomic\Resources\Concerns\ResourceTranslatable;
 use CactusGalaxy\FilamentAstrotomic\TranslatableTab;
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use App\Traits\CommonActionButtons;
 
@@ -30,7 +40,7 @@ class DropdownListResource extends Resource
 
     protected static ?string $model = DropdownList::class;
 
-    protected static ?string $navigationIcon = 'heroicon-c-list-bullet';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-c-list-bullet';
 
 
     public static function getNavigationBadge(): ?string
@@ -70,10 +80,10 @@ class DropdownListResource extends Resource
 
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
 
-        return $form->schema([
+        return $schema->components([
 
             TranslatableTabsNoArabic::make()
                 ->columnSpan(2)
@@ -84,7 +94,7 @@ class DropdownListResource extends Resource
                             ->columnSpan(2)
                             ->schema([
 
-                                Forms\Components\TextInput::make($tab->makeName('title'))
+                                TextInput::make($tab->makeName('title'))
                                     ->label(__("Title[" . $tab->getLocale() . "]"))
                                     ->required($tab->getLocale() === 'en')
                                     ->maxLength(1000)
@@ -92,7 +102,7 @@ class DropdownListResource extends Resource
                                     ->validationMessages([
                                         'not_regex' => 'HTML is invalid',
                                     ]),
-                                Forms\Components\TextInput::make('slug')
+                                TextInput::make('slug')
                                     ->label(__("Slug"))
                                     ->unique(ignoreRecord: true)
                                     ->helperText('Generated Automatically')
@@ -126,7 +136,7 @@ class DropdownListResource extends Resource
                             ->columnSpan(1)
                             ->schema([
 
-                                Forms\Components\DatePicker::make('published_at')
+                                DatePicker::make('published_at')
                                     ->label(__("Published At"))
                                     ->rules(['date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'])
                                     ->default(Carbon::now())
@@ -136,7 +146,7 @@ class DropdownListResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label(__("Status"))
                                     ->required()
                                     ->options(DropdownList::getStatusList())
@@ -148,7 +158,7 @@ class DropdownListResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\Select::make('category')
+                                Select::make('category')
                                     ->label(__("Category"))
                                     ->required()
                                     ->options(DropdownList::getCategoryList())
@@ -161,7 +171,7 @@ class DropdownListResource extends Resource
                                     ->reactive(),
 
 
-                                Forms\Components\TextInput::make('weight_order')
+                                TextInput::make('weight_order')
                                     ->label(__("Weight Order"))
                                     ->required()
                                     ->integer()
@@ -180,10 +190,10 @@ class DropdownListResource extends Resource
         ]);
     }
 
-    public static function formPopup(Form $form, $defaultCategory): Form
+    public static function formPopup(Schema $schema, $defaultCategory): Schema
     {
 
-        return $form->schema([
+        return $schema->components([
 
             TranslatableTabsNoArabic::make()
                 ->columnSpan(2)
@@ -194,7 +204,7 @@ class DropdownListResource extends Resource
                             ->columnSpan(2)
                             ->schema([
 
-                                Forms\Components\TextInput::make($tab->makeName('title'))
+                                TextInput::make($tab->makeName('title'))
                                     ->label(__("Title[" . $tab->getLocale() . "]"))
                                     ->required()
                                     ->maxLength(255)
@@ -203,7 +213,7 @@ class DropdownListResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\TextInput::make('slug')
+                                TextInput::make('slug')
                                     ->label(__("Slug"))
                                     ->unique()
                                     ->required()
@@ -218,12 +228,12 @@ class DropdownListResource extends Resource
                             ->columnSpan(1)
                             ->schema([
 
-                                Forms\Components\DatePicker::make('published_at')
+                                DatePicker::make('published_at')
                                     ->label(__("Published At"))
                                     ->default(Carbon::now())
                                     ->required(),
 
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label(__("Status"))
                                     ->required()
                                     ->options(DropdownList::getStatusList())
@@ -232,7 +242,7 @@ class DropdownListResource extends Resource
                                     ->selectablePlaceholder(false)
                                     ->live(),
 
-                                Forms\Components\Select::make('category')
+                                Select::make('category')
                                     ->label(__("Category"))
                                     ->required()
                                     ->options(DropdownList::getCategoryList())
@@ -254,7 +264,7 @@ class DropdownListResource extends Resource
         return $table
             ->columns([
 
-                Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label(__("title"))
                     ->searchable(
                         isIndividual: false,
@@ -268,21 +278,21 @@ class DropdownListResource extends Resource
                     ),
 
 
-                \App\Classes\FilamentUtility::publishedAtColumn(),
+                FilamentUtility::publishedAtColumn(),
 
 
-                Tables\Columns\SelectColumn::make('category')
+                SelectColumn::make('category')
                     ->label(__("Category"))
                     ->options(DropdownList::getCategoryList())
                     ->alignCenter()
                     ->selectablePlaceholder(false),
 
-                \App\Classes\FilamentUtility::statusColumn(static::$model),
-                \App\Classes\FilamentUtility::createdAtColumn(),
-                \App\Classes\FilamentUtility::updatedAtColumn(),
+                FilamentUtility::statusColumn(static::$model),
+                FilamentUtility::createdAtColumn(),
+                FilamentUtility::updatedAtColumn(),
 
-                \App\Classes\FilamentUtility::creatorColumn(),
-                \App\Classes\FilamentUtility::updaterColumn(),
+                FilamentUtility::creatorColumn(),
+                FilamentUtility::updaterColumn(),
 
             ])
             ->defaultSort(function (Builder $query): Builder {
@@ -295,30 +305,30 @@ class DropdownListResource extends Resource
 
             ->filters(static::renderFilterActions([]))
 
-            ->actions(
+            ->recordActions(
                 static::renderTableActions(),
             )
 
             ->headerActions([])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('publish')
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    BulkAction::make('publish')
                         ->action(fn (Collection $records) => static::BulkActivate($records))
                         ->deselectRecordsAfterCompletion()
                         ->requiresConfirmation()
                         ->color('success')
                         ->icon('fas-toggle-on')
                         ->visible(static::toggleColumnVisibility()),
-                    Tables\Actions\BulkAction::make('pending')
+                    BulkAction::make('pending')
                         ->action(fn (Collection $records) => static::BulkDeactivate($records))
                         ->deselectRecordsAfterCompletion()
                         ->requiresConfirmation()
                         ->color('warning')
                         ->icon('fas-toggle-off')
                         ->visible(static::toggleColumnVisibility()),
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ]);
     }

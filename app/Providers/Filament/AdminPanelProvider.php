@@ -2,6 +2,11 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Pages\Dashboard;
+use Filament\Widgets\AccountWidget;
+use Awcodes\Curator\CuratorPlugin;
+use App\Filament\Pages\Settings\AllSetting;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use App\Filament\Pages\Auth\CustomLogin;
 use App\Classes\CustomPackage\CustomPlugin\CustomFilamentOtpLoginPlugin;
 use App\Classes\CustomPackage\CustomPlugin\CustomTranslationManagerPlugin;
@@ -61,11 +66,11 @@ class AdminPanelProvider extends PanelProvider
                 ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
                 ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
                 ->pages([
-                    Pages\Dashboard::class,
+                    Dashboard::class,
                 ])
                 ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
                 ->widgets([
-                    Widgets\AccountWidget::class,
+                    AccountWidget::class,
                     //Widgets\FilamentInfoWidget::class,
                 ])
                 ->middleware([
@@ -91,7 +96,7 @@ class AdminPanelProvider extends PanelProvider
 
                     FilamentAstrotomicTranslatablePlugin::make(),
                     CustomTranslationManagerPlugin::make(),
-                    \Awcodes\Curator\CuratorPlugin::make()
+                    CuratorPlugin::make()
                             ->label('Media')
                             ->pluralLabel('Media')
                             ->navigationIcon('heroicon-o-photo')
@@ -104,10 +109,10 @@ class AdminPanelProvider extends PanelProvider
 
                     FilamentSettingsPlugin::make()
                         ->pages([
-                            \App\Filament\Pages\Settings\AllSetting::class,
+                            AllSetting::class,
                         ]),
 
-                    \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
+                    FilamentShieldPlugin::make(),
 
                     $activateOTP ? CustomFilamentOtpLoginPlugin::make() : null,
                 ]))

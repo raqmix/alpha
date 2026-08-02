@@ -2,8 +2,7 @@
 
 namespace App\Filament\Pages\Auth;
 
-use Filament\Pages\Auth\Login;
-
+use Filament\Auth\Pages\Login;
 
 class CustomLogin extends  Login
 {
@@ -20,6 +19,6 @@ class CustomLogin extends  Login
             'status' => config('auth.providers.users.model')::STATUS_ACTIVE,
         ];
     }
-    
+
 
 }

@@ -2,6 +2,19 @@
 
 namespace App\Filament\Resources\Product;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
 use App\Classes\CustomPackage\CustomComponent\CustomCuratorPicker;
 use App\Classes\FilamentUtility;
 use App\Filament\Forms\Components\TranslatableTabsNoArabic;
@@ -17,12 +30,9 @@ use CactusGalaxy\FilamentAstrotomic\Resources\Concerns\ResourceTranslatable;
 use CactusGalaxy\FilamentAstrotomic\TranslatableTab;
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -35,7 +45,7 @@ class ProductResource extends Resource
 
     protected static ?string $model = Product::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-archive-box';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-archive-box';
 
     protected static ?int $navigationSort = 1;
 
@@ -69,9 +79,9 @@ class ProductResource extends Resource
         return __('Media Center');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
             TranslatableTabsNoArabic::make()
                 ->columnSpan(2)
                 ->localeTabSchema(fn (TranslatableTab $tab) => [
@@ -79,16 +89,16 @@ class ProductResource extends Resource
                         Section::make()
                             ->columnSpan(2)
                             ->schema([
-                                Forms\Components\TextInput::make($tab->makeName('title'))
+                                TextInput::make($tab->makeName('title'))
                                     ->label(__('Title[' . $tab->getLocale() . ']'))
                                     ->required($tab->getLocale() === 'en')
                                     ->maxLength(255),
 
-                                Forms\Components\TextInput::make($tab->makeName('hero_title'))
+                                TextInput::make($tab->makeName('hero_title'))
                                     ->label(__('Hero Title[' . $tab->getLocale() . ']'))
                                     ->maxLength(255),
 
-                                Forms\Components\TextInput::make('slug')
+                                TextInput::make('slug')
                                     ->label(__('Slug'))
                                     ->unique(ignoreRecord: true)
                                     ->helperText('Generated Automatically')
@@ -127,7 +137,7 @@ class ProductResource extends Resource
                                             ->listDisplay(false)
                                             ->orderColumn('order')
                                             ->multiple(false),
-                                        Forms\Components\TextInput::make('alt')
+                                        TextInput::make('alt')
                                             ->label(__('Alt Text')),
                                     ])
                                     ->columnSpanFull(),
@@ -172,7 +182,7 @@ class ProductResource extends Resource
                                                 'right' => __('Right'),
                                             ])
                                             ->native(false),
-                                        Forms\Components\TextInput::make('heading')
+                                        TextInput::make('heading')
                                             ->label(__('Heading'))
                                             ->required(),
                                         Textarea::make('content')
@@ -229,10 +239,10 @@ class ProductResource extends Resource
                                     ->itemLabel(fn (array $state): ?string => $state['label'] ?? __('Client Logo'))
                                     ->addActionLabel(__('Add Client Logo'))
                                     ->schema([
-                                        Forms\Components\TextInput::make('label')
+                                        TextInput::make('label')
                                             ->label(__('Label'))
                                             ->required(),
-                                        Forms\Components\TextInput::make('icon')
+                                        TextInput::make('icon')
                                             ->label(__('Icon Class'))
                                             ->placeholder('fas fa-building'),
                                     ])
@@ -242,17 +252,17 @@ class ProductResource extends Resource
                         Section::make()
                             ->columnSpan(1)
                             ->schema([
-                                Forms\Components\TextInput::make('sku')
+                                TextInput::make('sku')
                                     ->label(__('SKU'))
                                     ->maxLength(255),
 
-                                Forms\Components\DatePicker::make('published_at')
+                                DatePicker::make('published_at')
                                     ->label(__('Published At'))
                                     ->rules(['date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'])
                                     ->default(Carbon::now())
                                     ->required(),
 
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label(__('Status'))
                                     ->required()
                                     ->options(self::$model::getStatusList())
@@ -260,19 +270,19 @@ class ProductResource extends Resource
                                     ->native(false)
                                     ->selectablePlaceholder(false),
 
-                                Forms\Components\Toggle::make('is_campaign')
+                                Toggle::make('is_campaign')
                                     ->label(__('PROMOTE TO HOMEPAGE'))
                                     ->default(false)
                                     ->required()
                                     ->inline(false),
 
-                                Forms\Components\TextInput::make('weight_order')
+                                TextInput::make('weight_order')
                                     ->label(__('Weight Order'))
                                     ->required()
                                     ->integer()
                                     ->default(10),
 
-                                Forms\Components\Select::make('category_id')
+                                Select::make('category_id')
                                     ->label(__('Category'))
                                     ->options(Product::getProductCategoryList())
                                     ->native(false)
@@ -289,7 +299,7 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label(__('Title'))
                     ->searchable(
                         isIndividual: false,
@@ -301,17 +311,17 @@ class ProductResource extends Resource
                         }
                     ),
                 CuratorColumn::make('image_id')->label('Image'),
-                Tables\Columns\TextColumn::make('category.title')
+                TextColumn::make('category.title')
                     ->label(__('Category'))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('sku')
+                TextColumn::make('sku')
                     ->label(__('SKU'))
                     ->toggleable(),
-                \App\Classes\FilamentUtility::statusColumn(static::$model),
-                \App\Classes\FilamentUtility::createdAtColumn(),
-                \App\Classes\FilamentUtility::updatedAtColumn(),
-                \App\Classes\FilamentUtility::creatorColumn(),
-                \App\Classes\FilamentUtility::updaterColumn(),
+                FilamentUtility::statusColumn(static::$model),
+                FilamentUtility::createdAtColumn(),
+                FilamentUtility::updatedAtColumn(),
+                FilamentUtility::creatorColumn(),
+                FilamentUtility::updaterColumn(),
             ])
             ->defaultSort(function (Builder $query): Builder {
                 return $query
@@ -321,32 +331,32 @@ class ProductResource extends Resource
             ->striped()
             ->filters(
                 static::renderFilterActions([
-                    Tables\Filters\SelectFilter::make('category_id')
+                    SelectFilter::make('category_id')
                         ->label(__('Category'))
                         ->options(Product::getProductCategoryList()),
                 ]),
             )
-            ->actions(static::renderTableActions())
+            ->recordActions(static::renderTableActions())
             ->headerActions([])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('publish')
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    BulkAction::make('publish')
                         ->action(fn (Collection $records) => static::BulkActivate($records))
                         ->deselectRecordsAfterCompletion()
                         ->requiresConfirmation()
                         ->color('success')
                         ->icon('fas-toggle-on')
                         ->visible(static::toggleColumnVisibility()),
-                    Tables\Actions\BulkAction::make('pending')
+                    BulkAction::make('pending')
                         ->action(fn (Collection $records) => static::BulkDeactivate($records))
                         ->deselectRecordsAfterCompletion()
                         ->requiresConfirmation()
                         ->color('warning')
                         ->icon('fas-toggle-off')
                         ->visible(static::toggleColumnVisibility()),
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ]);
     }

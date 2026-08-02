@@ -2,6 +2,28 @@
 
 namespace App\Filament\Resources\Bms;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Actions\Action;
+use Livewire\Component;
+use Filament\Schemas\Components\Actions;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Closure;
+use Filament\Tables\Columns\TextColumn;
+use App\Classes\FilamentUtility;
+use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
 use App\Classes\CustomPackage\CustomComponent\CustomCuratorPicker;
 use App\Filament\Resources\Bms\Model\Bms;
 use App\Filament\Resources\Bms\ResourcePages\Create;
@@ -21,14 +43,8 @@ use CactusGalaxy\FilamentAstrotomic\Resources\Concerns\ResourceTranslatable;
 use CactusGalaxy\FilamentAstrotomic\TranslatableTab;
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -43,7 +59,7 @@ class BmsResource extends Resource
 
     protected static ?string $model = Bms::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     public static function getNavigationBadge(): ?string
     {
@@ -81,10 +97,10 @@ class BmsResource extends Resource
 
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
 
-        return $form->schema([
+        return $schema->components([
 
             TranslatableTabsNoArabic::make()
                 ->columnSpan(2)
@@ -95,7 +111,7 @@ class BmsResource extends Resource
                             ->columnSpan(2)
                             ->schema([
 
-                                Forms\Components\TextInput::make($tab->makeName('title'))
+                                TextInput::make($tab->makeName('title'))
                                     ->label(__("Title[" . $tab->getLocale() . "]"))
                                     ->required($tab->getLocale() === 'en')
                                     ->maxLength(510)
@@ -104,7 +120,7 @@ class BmsResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\TextInput::make('slug')
+                                TextInput::make('slug')
                                     ->label(__("Slug"))
                                     ->unique(ignoreRecord: true)
                                     ->helperText('Generated Automatically')
@@ -115,7 +131,7 @@ class BmsResource extends Resource
                                     ]),
 
 
-                                Forms\Components\TextInput::make($tab->makeName('second_title'))
+                                TextInput::make($tab->makeName('second_title'))
                                     ->label(__("Second Title[" . $tab->getLocale() . "]"))
 
                                     ->maxLength(255)
@@ -126,7 +142,7 @@ class BmsResource extends Resource
                                     ]),
 
 
-                                Forms\Components\Textarea::make($tab->makeName('brief'))
+                                Textarea::make($tab->makeName('brief'))
                                     ->label(__("Brief[" . $tab->getLocale() . "]"))
                                     ->maxLength(1000)
                                     ->rows(6)
@@ -160,22 +176,22 @@ class BmsResource extends Resource
                                             ?? __('Item');
                                     })
                                     ->schema([
-                                        Forms\Components\TextInput::make('number')
+                                        TextInput::make('number')
                                             ->label(__('Number'))
                                             ->nullable(),
-                                        Forms\Components\TextInput::make('suffix')
+                                        TextInput::make('suffix')
                                             ->label(__('Suffix'))
                                             ->nullable(),
-                                        Forms\Components\TextInput::make('label_en')
+                                        TextInput::make('label_en')
                                             ->label(__('Label'))
                                             ->nullable(),
-                                        Forms\Components\TextInput::make('icon')
+                                        TextInput::make('icon')
                                             ->label(__('Icon'))
                                             ->nullable(),
-                                        Forms\Components\TextInput::make('title_en')
+                                        TextInput::make('title_en')
                                             ->label(__('Title'))
                                             ->nullable(),
-                                        Forms\Components\Textarea::make('description_en')
+                                        Textarea::make('description_en')
                                             ->label(__('Description'))
                                             ->nullable(),
                                     ])
@@ -229,7 +245,7 @@ class BmsResource extends Resource
                                             ->columnSpanFull()
                                             ->deleteAction(
                                                 fn(Action $action) => $action->requiresConfirmation()
-                                                    ->action(function (array $arguments, Repeater $component, \Livewire\Component $livewire): void {
+                                                    ->action(function (array $arguments, Repeater $component, Component $livewire): void {
                                                         $records = $component->getCachedExistingRecords();
                                                         $record = $records[$arguments['item']] ?? null;
                                                         if ($record) {
@@ -246,7 +262,7 @@ class BmsResource extends Resource
                                                     ->icon('heroicon-m-pencil-square')
                                                     ->modalHeading(__('Edit Container'))
                                                     ->modalWidth('5xl')
-                                                    ->form(fn(Form $form, $get) => ButtonResource::formPopup($form, $get("slug")))
+                                                    ->schema(fn(Schema $schema, $get) => ButtonResource::formPopup($schema, $get("slug")))
                                                     ->fillForm(function (array $arguments, Repeater $component) {
 
                                                         $records = $component->getCachedExistingRecords();
@@ -260,7 +276,7 @@ class BmsResource extends Resource
 
                                                         return $data;
                                                     })
-                                                    ->action(function ($data, $record, array $arguments, Repeater $component, \Livewire\Component $livewire): void {
+                                                    ->action(function ($data, $record, array $arguments, Repeater $component, Component $livewire): void {
                                                         $records = $component->getCachedExistingRecords();
                                                         $record = $records[$arguments['item']] ?? null;
                                                         $record->update($data);
@@ -275,8 +291,8 @@ class BmsResource extends Resource
                                                 ->label(__('Add Button'))
                                                 ->modalHeading(__('Add Button'))
                                                 ->modalWidth('5xl')
-                                                ->form(fn(Form $form, $get) => ButtonResource::formPopup($form, $get('slug')))
-                                                ->action(function ($data, \Livewire\Component $livewire, $record): void {
+                                                ->schema(fn(Schema $schema, $get) => ButtonResource::formPopup($schema, $get('slug')))
+                                                ->action(function ($data, Component $livewire, $record): void {
                                                     Button::create($data);
                                                     $livewire->dispatch('refresh');
                                                 })
@@ -302,7 +318,7 @@ class BmsResource extends Resource
                             ->schema([
 
 
-                                Forms\Components\DatePicker::make('published_at')
+                                DatePicker::make('published_at')
                                     ->label(__("Published At"))
                                     ->rules(['date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'])
                                     ->default(Carbon::now())
@@ -312,7 +328,7 @@ class BmsResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label(__("Status"))
                                     ->required()
                                     ->options(Bms::getStatusList())
@@ -324,7 +340,7 @@ class BmsResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                \Filament\Forms\Components\Select::make('category')
+                                Select::make('category')
                                     ->label(__('Category'))
                                     ->required()
                                     ->options(function () {
@@ -367,7 +383,7 @@ class BmsResource extends Resource
                                 //     ->validationMessages([
                                 //         'not_regex' => 'HTML is invalid',
                                 //     ]),
-                                Forms\Components\TextInput::make('weight_order')
+                                TextInput::make('weight_order')
                                     ->label(__("Weight Order"))
                                     ->required()
                                     ->integer()
@@ -387,10 +403,10 @@ class BmsResource extends Resource
     }
 
 
-    public static function formPopup(Form $form, $params = [], $get): Form
+    public static function formPopup(Schema $schema, $params = [], $get): Schema
     {
 
-        return $form->schema([
+        return $schema->components([
 
             TranslatableTabsNoArabic::make()
                 ->columnSpan(2)
@@ -402,18 +418,18 @@ class BmsResource extends Resource
                             ->schema([
                                 Hidden::make('module_id')
                                     ->default(
-                                        $params['module_id'] instanceof \Closure
+                                        $params['module_id'] instanceof Closure
                                         ? $params['module_id']($get)
                                         : $params['module_id'] ?? null
                                     ),
 
                                 Hidden::make('module_class')
                                     ->default(
-                                        $params['module_class'] instanceof \Closure
+                                        $params['module_class'] instanceof Closure
                                         ? $params['module_class']($get)
                                         : $params['module_class'] ?? null
                                     ),
-                                Forms\Components\TextInput::make($tab->makeName('title'))
+                                TextInput::make($tab->makeName('title'))
                                     ->label(__("Title[" . $tab->getLocale() . "]"))
                                     ->required()
                                     ->maxLength(510)
@@ -422,7 +438,7 @@ class BmsResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\TextInput::make('slug')
+                                TextInput::make('slug')
                                     ->label(__("Slug"))
                                     ->unique(ignoreRecord: true)
                                     ->helperText('Generated Automatically')
@@ -433,7 +449,7 @@ class BmsResource extends Resource
                                     ]),
 
 
-                                Forms\Components\TextInput::make($tab->makeName('second_title'))
+                                TextInput::make($tab->makeName('second_title'))
                                     ->label(__("Second Title[" . $tab->getLocale() . "]"))
 
                                     ->maxLength(255)
@@ -444,7 +460,7 @@ class BmsResource extends Resource
                                     ]),
 
 
-                                Forms\Components\Textarea::make($tab->makeName('brief'))
+                                Textarea::make($tab->makeName('brief'))
                                     ->label(__("Brief[" . $tab->getLocale() . "]"))
                                     ->maxLength(1000)
                                     ->rows(6)
@@ -511,7 +527,7 @@ class BmsResource extends Resource
                                 //         'not_regex' => 'HTML is invalid',
                                 //     ]),
 
-                                Forms\Components\DatePicker::make('published_at')
+                                DatePicker::make('published_at')
                                     ->label(__("Published At"))
                                     ->rules(['date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'])
                                     ->default(Carbon::now())
@@ -521,7 +537,7 @@ class BmsResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label(__("Status"))
                                     ->required()
                                     ->options(Bms::getStatusList())
@@ -534,7 +550,7 @@ class BmsResource extends Resource
                                     ]),
 
 
-                                \Filament\Forms\Components\Select::make('category')
+                                Select::make('category')
                                     ->label(__("Category"))
                                     ->required()
                                     ->options(function () {
@@ -555,13 +571,13 @@ class BmsResource extends Resource
                                     ->validationMessages([
                                         'not_regex' => 'HTML is invalid',
                                     ])->default(
-                                        $params['category'] instanceof \Closure
+                                        $params['category'] instanceof Closure
                                         ? $params['category']($get)
                                         : $params['category'] ?? null
                                     ),
 
 
-                                Forms\Components\TextInput::make('weight_order')
+                                TextInput::make('weight_order')
                                     ->label(__("Weight Order"))
                                     ->required()
                                     ->integer()
@@ -593,7 +609,7 @@ class BmsResource extends Resource
                 //     ->size(40),
 
 
-                Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label(__("title"))
                     ->searchable(
                         isIndividual: false,
@@ -608,10 +624,10 @@ class BmsResource extends Resource
 
 
 
-                \App\Classes\FilamentUtility::publishedAtColumn(),
+                FilamentUtility::publishedAtColumn(),
 
 
-                Tables\Columns\SelectColumn::make('category')
+                SelectColumn::make('category')
                     ->label(__("Category"))
                     ->options(function () {
                         $static = Bms::getCategoryListPlain();
@@ -631,12 +647,12 @@ class BmsResource extends Resource
                     ->visible(static::selectColumnVisibility()),
 
 
-                \App\Classes\FilamentUtility::statusColumn(static::$model),
-                \App\Classes\FilamentUtility::createdAtColumn(),
-                \App\Classes\FilamentUtility::updatedAtColumn(),
+                FilamentUtility::statusColumn(static::$model),
+                FilamentUtility::createdAtColumn(),
+                FilamentUtility::updatedAtColumn(),
 
-                \App\Classes\FilamentUtility::creatorColumn(),
-                \App\Classes\FilamentUtility::updaterColumn(),
+                FilamentUtility::creatorColumn(),
+                FilamentUtility::updaterColumn(),
 
 
 
@@ -652,37 +668,37 @@ class BmsResource extends Resource
             ->filters(
 
                 static::renderFilterActions([
-                    Tables\Filters\SelectFilter::make('category')
+                    SelectFilter::make('category')
                         ->label(__('Filter by Category'))
                         ->options(Bms::getCategoryList())
                         ->searchable(),
                 ]),
             )
-            ->filtersLayout(\Filament\Tables\Enums\FiltersLayout::AboveContent)
+            ->filtersLayout(FiltersLayout::AboveContent)
 
-            ->actions(
+            ->recordActions(
                 static::renderTableActions(),
             )
             ->headerActions([])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('publish')
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    BulkAction::make('publish')
                         ->action(fn (Collection $records) => static::BulkActivate($records))
                         ->deselectRecordsAfterCompletion()
                         ->requiresConfirmation()
                         ->color('success')
                         ->icon('fas-toggle-on')
                         ->visible(static::toggleColumnVisibility()),
-                    Tables\Actions\BulkAction::make('pending')
+                    BulkAction::make('pending')
                         ->action(fn (Collection $records) => static::BulkDeactivate($records))
                         ->deselectRecordsAfterCompletion()
                         ->requiresConfirmation()
                         ->color('warning')
                         ->icon('fas-toggle-off')
                         ->visible(static::toggleColumnVisibility()),
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ])
             ->filtersFormColumns(4);

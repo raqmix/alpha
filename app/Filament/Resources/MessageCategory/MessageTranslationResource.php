@@ -2,15 +2,19 @@
 
 namespace App\Filament\Resources\MessageCategory;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\MessageCategory\Model\Message;
 use App\Traits\CommonActionButtons;
 use App\Filament\Forms\Components\TranslatableTabsNoArabic;
 use CactusGalaxy\FilamentAstrotomic\Resources\Concerns\ResourceTranslatable;
 use CactusGalaxy\FilamentAstrotomic\TranslatableTab;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -21,7 +25,7 @@ class MessageTranslationResource extends Resource
 
     protected static ?string $model = Message::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-globe-alt';
 
     protected static bool $shouldRegisterNavigation = false;
 
@@ -42,9 +46,9 @@ class MessageTranslationResource extends Resource
     }
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
 
             TranslatableTabsNoArabic::make()
             ->columnSpan(2)
@@ -55,7 +59,7 @@ class MessageTranslationResource extends Resource
                     ->columnSpan(2)
                     ->schema([
 
-                        Forms\Components\TextInput::make('message')
+                        TextInput::make('message')
                             ->label(__("Message"))
                             ->autofocus()
                             ->required()
@@ -66,7 +70,7 @@ class MessageTranslationResource extends Resource
                             ]),
 
 
-                        Forms\Components\TextInput::make($tab->makeName('translation'))
+                        TextInput::make($tab->makeName('translation'))
                             ->label(__("Translation[". $tab->getLocale()."]"))
                             ->autofocus()
                             ->required()
@@ -82,7 +86,7 @@ class MessageTranslationResource extends Resource
                     ->columnSpan(1)
                     ->schema([
 
-                        Forms\Components\Select::make('category_id')
+                        Select::make('category_id')
                             ->label(__("Category"))
                             ->required()
                             ->relationship(name: 'category', titleAttribute: 'title')
@@ -113,14 +117,14 @@ class MessageTranslationResource extends Resource
             ->filters(
                 static::renderFilterActions(),
             )
-            ->actions([
+            ->recordActions([
                 //Tables\Actions\EditAction::make(),
                 //DeleteAction::make(),
 
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

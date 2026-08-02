@@ -2,6 +2,22 @@
 
 namespace App\Filament\Resources\Button;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
+use App\Filament\Resources\Button\ResourcePages\ListItems;
+use App\Filament\Resources\Button\ResourcePages\Create;
+use App\Filament\Resources\Button\ResourcePages\Edit;
 use App\Classes\CustomPackage\CustomComponent\CustomCuratorPicker;
 use App\Classes\CustomPackage\CustomComponent\CustomIconPicker;
 use App\Classes\FilamentUtility;
@@ -17,9 +33,6 @@ use CactusGalaxy\FilamentAstrotomic\Resources\Concerns\ResourceTranslatable;
 use CactusGalaxy\FilamentAstrotomic\TranslatableTab;
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -37,7 +50,7 @@ class ButtonResource extends Resource
 
     protected static ?string $model = Button::class;
 
-    protected static ?string $navigationIcon = 'heroicon-s-cursor-arrow-rays';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-s-cursor-arrow-rays';
 
     public static function getNavigationBadge(): ?string
     {
@@ -75,10 +88,10 @@ class ButtonResource extends Resource
 
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
 
-        return $form->schema([
+        return $schema->components([
 
             TranslatableTabsNoArabic::make()
                 ->columnSpan(2)
@@ -89,7 +102,7 @@ class ButtonResource extends Resource
                             ->columnSpan(2)
                             ->schema([
 
-                                Forms\Components\TextInput::make($tab->makeName('url'))
+                                TextInput::make($tab->makeName('url'))
                                     ->label(__("Url[" . $tab->getLocale() . "]"))
                                     ->maxLength(510)
                                     ->notRegex('/<[^b][^r][^>]*>/')
@@ -98,7 +111,7 @@ class ButtonResource extends Resource
                                     ]),
 
 
-                                Forms\Components\TextInput::make($tab->makeName('label'))
+                                TextInput::make($tab->makeName('label'))
                                     ->label(__("Label[" . $tab->getLocale() . "]"))
                                     ->maxLength(255)
                                     ->notRegex('/<[^b][^r][^>]*>/')
@@ -116,7 +129,7 @@ class ButtonResource extends Resource
 
                                 CustomIconPicker::make('icon'),
 
-                                Forms\Components\DatePicker::make('published_at')
+                                DatePicker::make('published_at')
                                     ->label(__("Published At"))
                                     ->rules(['date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'])
                                     ->default(Carbon::now())
@@ -126,7 +139,7 @@ class ButtonResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label(__("Status"))
                                     ->required()
                                     ->options(Bms::getStatusList())
@@ -139,14 +152,14 @@ class ButtonResource extends Resource
                                     ]),
 
 
-                                \Filament\Forms\Components\Select::make('category_slug')
+                                Select::make('category_slug')
                                     ->label(__("Category"))
                                     ->required()
                                     ->relationship('category', 'title', fn(Builder $query) => $query->where('category', DropdownList::BUTTON_CATEGORY))
                                     ->getOptionLabelFromRecordUsing(fn(Model $record) => "{$record->title}")
                                     ->native(false)
                                     ->createOptionModalHeading('Create')
-                                    ->createOptionForm(fn(Form $form) => DropdownListResource::formPopup($form, DropdownList::BUTTON_CATEGORY))
+                                    ->createOptionForm(fn(Schema $schema) => DropdownListResource::formPopup($schema, DropdownList::BUTTON_CATEGORY))
                                     ->createOptionUsing(function (array $data) {
 
                                         $optionRecord = DropdownList::create($data);
@@ -160,7 +173,7 @@ class ButtonResource extends Resource
                                     ]),
 
 
-                                Forms\Components\TextInput::make('weight_order')
+                                TextInput::make('weight_order')
                                     ->label(__("Weight Order"))
                                     ->required()
                                     ->integer()
@@ -180,10 +193,10 @@ class ButtonResource extends Resource
     }
 
 
-    public static function formPopup(Form $form, $categorySlug): Form
+    public static function formPopup(Schema $schema, $categorySlug): Schema
     {
 
-        return $form->schema([
+        return $schema->components([
 
             TranslatableTabsNoArabic::make()
                 ->columnSpan(2)
@@ -194,7 +207,7 @@ class ButtonResource extends Resource
                             ->columnSpan(2)
                             ->schema([
 
-                                Forms\Components\TextInput::make($tab->makeName('url'))
+                                TextInput::make($tab->makeName('url'))
                                     ->label(__("Url[" . $tab->getLocale() . "]"))
                                     ->required()
                                     ->maxLength(510)
@@ -204,7 +217,7 @@ class ButtonResource extends Resource
                                     ]),
 
 
-                                Forms\Components\TextInput::make($tab->makeName('label'))
+                                TextInput::make($tab->makeName('label'))
                                     ->label(__("Label[" . $tab->getLocale() . "]"))
                                     ->maxLength(255)
                                     ->notRegex('/<[^b][^r][^>]*>/')
@@ -222,7 +235,7 @@ class ButtonResource extends Resource
 
                                 CustomIconPicker::make('icon'),
 
-                                Forms\Components\DatePicker::make('published_at')
+                                DatePicker::make('published_at')
                                     ->label(__("Published At"))
                                     ->rules(['date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'])
                                     ->default(Carbon::now())
@@ -232,7 +245,7 @@ class ButtonResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label(__("Status"))
                                     ->required()
                                     ->options(Bms::getStatusList())
@@ -283,7 +296,7 @@ class ButtonResource extends Resource
 
 
 
-                Tables\Columns\TextColumn::make('url')
+                TextColumn::make('url')
                     ->label(__("Url"))
                     ->searchable(
                         isIndividual: false,
@@ -297,7 +310,7 @@ class ButtonResource extends Resource
                     )->words('5')->html(),
 
 
-                Tables\Columns\TextColumn::make('label')
+                TextColumn::make('label')
                     ->label(__("Label"))
                     ->searchable(
                         isIndividual: false,
@@ -312,10 +325,10 @@ class ButtonResource extends Resource
 
 
 
-                \App\Classes\FilamentUtility::publishedAtColumn(),
+                FilamentUtility::publishedAtColumn(),
 
 
-                Tables\Columns\SelectColumn::make('category_slug')
+                SelectColumn::make('category_slug')
                     ->label(__("Category"))
                     ->options(Button::getButtonCategoryList())
                     ->alignCenter()
@@ -323,12 +336,12 @@ class ButtonResource extends Resource
                     ->visible(static::selectColumnVisibility()),
 
 
-                \App\Classes\FilamentUtility::statusColumn(static::$model),
-                \App\Classes\FilamentUtility::createdAtColumn(),
-                \App\Classes\FilamentUtility::updatedAtColumn(),
+                FilamentUtility::statusColumn(static::$model),
+                FilamentUtility::createdAtColumn(),
+                FilamentUtility::updatedAtColumn(),
 
-                \App\Classes\FilamentUtility::creatorColumn(),
-                \App\Classes\FilamentUtility::updaterColumn(),
+                FilamentUtility::creatorColumn(),
+                FilamentUtility::updaterColumn(),
 
 
 
@@ -346,34 +359,34 @@ class ButtonResource extends Resource
             ->filters(
 
                 static::renderFilterActions([
-                    Tables\Filters\SelectFilter::make('category_slug')
+                    SelectFilter::make('category_slug')
                         ->options(Button::getButtonCategoryList()),
                 ]),
             )
 
-            ->actions(
+            ->recordActions(
                 static::renderTableActions(),
             )
             ->headerActions([])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\BulkAction::make('publish')
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    BulkAction::make('publish')
                         ->action(fn (Collection $records) => static::BulkActivate($records))
                         ->deselectRecordsAfterCompletion()
                         ->requiresConfirmation()
                         ->color('success')
                         ->icon('fas-toggle-on')
                         ->visible(static::toggleColumnVisibility()),
-                    Tables\Actions\BulkAction::make('pending')
+                    BulkAction::make('pending')
                         ->action(fn (Collection $records) => static::BulkDeactivate($records))
                         ->deselectRecordsAfterCompletion()
                         ->requiresConfirmation()
                         ->color('warning')
                         ->icon('fas-toggle-off')
                         ->visible(static::toggleColumnVisibility()),
-                    Tables\Actions\DeleteBulkAction::make(),
-                    Tables\Actions\ForceDeleteBulkAction::make(),
-                    Tables\Actions\RestoreBulkAction::make(),
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ]);
     }
@@ -388,9 +401,9 @@ class ButtonResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ResourcePages\ListItems::route('/'),
-            'create' => ResourcePages\Create::route('/create'),
-            'edit' => ResourcePages\Edit::route('/{record}/edit'),
+            'index' => ListItems::route('/'),
+            'create' => Create::route('/create'),
+            'edit' => Edit::route('/{record}/edit'),
         ];
     }
 

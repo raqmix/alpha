@@ -2,6 +2,14 @@
 
 namespace App\Filament\Resources\MessageCategory;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use App\Classes\FilamentUtility;
+use Filament\Actions\BulkActionGroup;
 use App\Filament\Resources\MessageCategory\Exports\MessageCategoryExporter;
 use App\Filament\Resources\MessageCategory\Imports\MessageCategoryImporter;
 use App\Filament\Resources\MessageCategory\Model\MessageCategory;
@@ -11,9 +19,6 @@ use App\Filament\Resources\MessageCategory\ResourcePages\ListItems;
 use App\Traits\AllColumnActionVisibility;
 use App\Traits\CommonActionButtons;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\DeleteAction;
@@ -27,7 +32,7 @@ class MessageCategoryResource extends Resource
 
     protected static ?string $model = MessageCategory::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-globe-alt';
 
 
     public static function getNavigationBadge(): ?string
@@ -67,10 +72,10 @@ class MessageCategoryResource extends Resource
         return false;
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-                ->schema([
+        return $schema
+                ->components([
 
                     Grid::make(3)->schema([
 
@@ -78,7 +83,7 @@ class MessageCategoryResource extends Resource
                         ->columnSpan(2)
                         ->schema([
 
-                                Forms\Components\TextInput::make('title')
+                                TextInput::make('title')
                                     ->label(__("Title"))
                                     ->autofocus()
                                     ->required()
@@ -97,7 +102,7 @@ class MessageCategoryResource extends Resource
                         ->columnSpan(1)
                         ->schema([
 
-                            Forms\Components\Select::make('status')
+                            Select::make('status')
                                 ->label(__("Status"))
                                 ->required()
                                 ->options(MessageCategory::getStatusList())
@@ -123,17 +128,17 @@ class MessageCategoryResource extends Resource
         return $table
         ->columns([
 
-            Tables\Columns\TextColumn::make('title')
+            TextColumn::make('title')
             ->label(__("title"))
             ->searchable(),
 
 
-            \App\Classes\FilamentUtility::statusColumn(static::$model),
-            \App\Classes\FilamentUtility::createdAtColumn(),
-            \App\Classes\FilamentUtility::updatedAtColumn(),
+            FilamentUtility::statusColumn(static::$model),
+            FilamentUtility::createdAtColumn(),
+            FilamentUtility::updatedAtColumn(),
 
-            \App\Classes\FilamentUtility::creatorColumn(),
-            \App\Classes\FilamentUtility::updaterColumn(),
+            FilamentUtility::creatorColumn(),
+            FilamentUtility::updaterColumn(),
 
         ])
         ->defaultSort('id', 'desc')
@@ -142,7 +147,7 @@ class MessageCategoryResource extends Resource
         ->filters(
             static::renderFilterActions(),
         )
-        ->actions(
+        ->recordActions(
             static::renderTableActions(),
         )
         ->headerActions(
@@ -150,9 +155,9 @@ class MessageCategoryResource extends Resource
             static::renderHeaderActions(MessageCategoryImporter::class, MessageCategoryExporter::class),
 
         )
-        ->bulkActions(
+        ->toolbarActions(
             [
-                Tables\Actions\BulkActionGroup::make(
+                BulkActionGroup::make(
                     static::renderBulkActions(MessageCategoryExporter::class)
 
                 ),

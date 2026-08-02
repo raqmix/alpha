@@ -2,10 +2,11 @@
 
 namespace App\Classes\CustomPackage\CustomComponent;
 
+use Filament\Actions\Action;
+use Livewire\Component;
 use Awcodes\Curator\Components\Forms\CuratorPicker;
 use Illuminate\Support\Str;
 use function Awcodes\Curator\get_media_items;
-use Filament\Forms\Components\Actions\Action;
 
 
 class CustomCuratorPicker extends CuratorPicker
@@ -35,7 +36,7 @@ class CustomCuratorPicker extends CuratorPicker
             ->color('gray')
             ->icon('heroicon-s-receipt-refund')
             ->hidden(fn (CuratorPicker $component): bool => $component->isDisabled())
-            ->action(function (CuratorPicker $component, \Livewire\Component $livewire) {
+            ->action(function (CuratorPicker $component, Component $livewire) {
                 $livewire->dispatch('open-modal', id: 'curator-panel', settings: [
                     'acceptedFileTypes' => $component->getAcceptedFileTypes(),
                     'defaultSort' => $component->getDefaultPanelSort(),

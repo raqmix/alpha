@@ -63,14 +63,14 @@ class Setting extends ModelsSetting implements Auditable
     {
         $date = strtotime(date("Y") . '-01-25');
         return [
-            'M d, Y' => \Carbon\Carbon::parse($date)->format('M d, Y'), // Example: Jan 22, 2025
-            'F d, Y' => \Carbon\Carbon::parse($date)->format('F d, Y'), // Example: January 22, 2025
-            'l, d F, Y' => \Carbon\Carbon::parse($date)->format('l, d F, Y'), // Example: Wednesday, January 22, 2025
-            'd F Y' => \Carbon\Carbon::parse($date)->format('d F Y'), // Example: 22 January 2025
-            'Y-m-d' => \Carbon\Carbon::parse($date)->format('Y-m-d'), // Example: 2025-01-22
-            'd/m/Y' => \Carbon\Carbon::parse($date)->format('d/m/Y'), // Example: 22/01/2025
-            'm/d/Y' => \Carbon\Carbon::parse($date)->format('m/d/Y'), // Example: 01/22/2025
-            'd.m.Y' => \Carbon\Carbon::parse($date)->format('d.m.Y'), // Example: 22.01.2025
+            'M d, Y' => Carbon::parse($date)->format('M d, Y'), // Example: Jan 22, 2025
+            'F d, Y' => Carbon::parse($date)->format('F d, Y'), // Example: January 22, 2025
+            'l, d F, Y' => Carbon::parse($date)->format('l, d F, Y'), // Example: Wednesday, January 22, 2025
+            'd F Y' => Carbon::parse($date)->format('d F Y'), // Example: 22 January 2025
+            'Y-m-d' => Carbon::parse($date)->format('Y-m-d'), // Example: 2025-01-22
+            'd/m/Y' => Carbon::parse($date)->format('d/m/Y'), // Example: 22/01/2025
+            'm/d/Y' => Carbon::parse($date)->format('m/d/Y'), // Example: 01/22/2025
+            'd.m.Y' => Carbon::parse($date)->format('d.m.Y'), // Example: 22.01.2025
         ];
     }
 

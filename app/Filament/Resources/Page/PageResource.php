@@ -2,6 +2,21 @@
 
 namespace App\Filament\Resources\Page;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Actions\Action;
+use Livewire\Component;
+use Filament\Schemas\Components\Actions;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\BulkActionGroup;
 use App\Classes\CustomPackage\CustomComponent\CustomCuratorPicker;
 use App\Classes\FilamentUtility;
 use App\Filament\Resources\Bms\BmsResource;
@@ -20,16 +35,10 @@ use CactusGalaxy\FilamentAstrotomic\Resources\Concerns\ResourceTranslatable;
 use CactusGalaxy\FilamentAstrotomic\TranslatableTab;
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 
 use App\Traits\CommonActionButtons;
 use App\Traits\AllColumnActionVisibility;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Repeater;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -43,7 +52,7 @@ class PageResource extends Resource
 
     protected static ?string $model = Page::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard';
 
     public static function getNavigationBadge(): ?string
     {
@@ -86,10 +95,10 @@ class PageResource extends Resource
 
 
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
 
-        return $form->schema([
+        return $schema->components([
 
             TranslatableTabsNoArabic::make()
                 ->columnSpan(2)
@@ -100,7 +109,7 @@ class PageResource extends Resource
                             ->columnSpan(2)
                             ->schema([
 
-                                Forms\Components\TextInput::make($tab->makeName('title'))
+                                TextInput::make($tab->makeName('title'))
                                     ->label(__("Title[" . $tab->getLocale() . "]"))
                                     ->required($tab->getLocale() === 'en')
                                     ->maxLength(255)
@@ -109,7 +118,7 @@ class PageResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\TextInput::make('slug')
+                                TextInput::make('slug')
                                     ->label(__("Slug"))
                                     ->unique(ignoreRecord: true)
                                     ->helperText('Generated Automatically')
@@ -128,7 +137,7 @@ class PageResource extends Resource
                                 //         'not_regex' => 'HTML is invalid',
                                 //     ]),
 
-                                Forms\Components\Textarea::make($tab->makeName('brief'))
+                                Textarea::make($tab->makeName('brief'))
                                     ->label(__("Brief[" . $tab->getLocale() . "]"))
                                     ->maxLength(1000)
                                     ->rows(6)
@@ -194,7 +203,7 @@ class PageResource extends Resource
                                             ->columnSpanFull()
                                             ->deleteAction(
                                                 fn(Action $action) => $action->requiresConfirmation()
-                                                    ->action(function (array $arguments, Repeater $component, \Livewire\Component $livewire): void {
+                                                    ->action(function (array $arguments, Repeater $component, Component $livewire): void {
                                                         $records = $component->getCachedExistingRecords();
                                                         $record = $records[$arguments['item']] ?? null;
                                                         if ($record) {
@@ -211,7 +220,7 @@ class PageResource extends Resource
                                                     ->icon('heroicon-m-pencil-square')
                                                     ->modalHeading(__('Edit Container'))
                                                     ->modalWidth('5xl')
-                                                    ->form(fn(Form $form, $get) => ButtonResource::formPopup($form, $get("slug")))
+                                                    ->schema(fn(Schema $schema, $get) => ButtonResource::formPopup($schema, $get("slug")))
                                                     ->fillForm(function (array $arguments, Repeater $component) {
 
                                                         $records = $component->getCachedExistingRecords();
@@ -225,7 +234,7 @@ class PageResource extends Resource
 
                                                         return $data;
                                                     })
-                                                    ->action(function ($data, $record, array $arguments, Repeater $component, \Livewire\Component $livewire): void {
+                                                    ->action(function ($data, $record, array $arguments, Repeater $component, Component $livewire): void {
                                                         $records = $component->getCachedExistingRecords();
                                                         $record = $records[$arguments['item']] ?? null;
                                                         $record->update($data);
@@ -240,8 +249,8 @@ class PageResource extends Resource
                                                 ->label(__('Add Button'))
                                                 ->modalHeading(__('Add Button'))
                                                 ->modalWidth('5xl')
-                                                ->form(fn(Form $form, $get) => ButtonResource::formPopup($form, $get('slug')))
-                                                ->action(function ($data, \Livewire\Component $livewire, $record): void {
+                                                ->schema(fn(Schema $schema, $get) => ButtonResource::formPopup($schema, $get('slug')))
+                                                ->action(function ($data, Component $livewire, $record): void {
                                                     Button::create($data);
                                                     $livewire->dispatch('refresh');
                                                 })
@@ -269,7 +278,7 @@ class PageResource extends Resource
                             ->columnSpan(1)
                             ->schema([
 
-                                Forms\Components\DatePicker::make('published_at')
+                                DatePicker::make('published_at')
                                     ->label(__("Published At"))
                                     ->rules(['date_format:Y-m-d', 'regex:/^\d{4}-\d{2}-\d{2}$/'])
                                     ->default(Carbon::now())
@@ -279,7 +288,7 @@ class PageResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label(__("Status"))
                                     ->required()
                                     ->options(Page::getStatusList())
@@ -293,7 +302,7 @@ class PageResource extends Resource
 
 
 
-                                Forms\Components\Select::make('view')
+                                Select::make('view')
                                     ->label(__("Page View"))
                                     ->required()
                                     ->options(Page::getViewList())
@@ -304,7 +313,7 @@ class PageResource extends Resource
                                         'not_regex' => 'HTML is invalid',
                                     ]),
 
-                                Forms\Components\Textarea::make($tab->makeName("video_link"))
+                                Textarea::make($tab->makeName("video_link"))
                                     ->label(__("Video Link[" . $tab->getLocale() . "]"))
                                     ->maxLength(255)
                                     ->notRegex('/<[^b][^r][^>]*>/')
@@ -313,7 +322,7 @@ class PageResource extends Resource
                                     ]),
 
 
-                                Forms\Components\TextInput::make('weight_order')
+                                TextInput::make('weight_order')
                                     ->label(__("Weight Order"))
                                     ->required()
                                     ->integer()
@@ -368,7 +377,7 @@ class PageResource extends Resource
             ->columns([
 
 
-                Tables\Columns\TextColumn::make('title')
+                TextColumn::make('title')
                     ->label(__("title"))
                     ->searchable(
                         isIndividual: false,
@@ -382,7 +391,7 @@ class PageResource extends Resource
                     )->words('5')->html(),
 
 
-                Tables\Columns\SelectColumn::make('view')
+                SelectColumn::make('view')
                     ->label(__("View Page"))
                     ->options(Page::getViewList())
                     ->alignCenter()
@@ -391,15 +400,15 @@ class PageResource extends Resource
 
 
 
-                \App\Classes\FilamentUtility::publishedAtColumn(),
+                FilamentUtility::publishedAtColumn(),
 
 
-                \App\Classes\FilamentUtility::statusColumn(static::$model),
-                \App\Classes\FilamentUtility::createdAtColumn(),
-                \App\Classes\FilamentUtility::updatedAtColumn(),
+                FilamentUtility::statusColumn(static::$model),
+                FilamentUtility::createdAtColumn(),
+                FilamentUtility::updatedAtColumn(),
 
-                \App\Classes\FilamentUtility::creatorColumn(),
-                \App\Classes\FilamentUtility::updaterColumn(),
+                FilamentUtility::creatorColumn(),
+                FilamentUtility::updaterColumn(),
 
 
 
@@ -413,12 +422,12 @@ class PageResource extends Resource
 
             ->filters(
                 static::renderFilterActions([
-                    Tables\Filters\SelectFilter::make('view')
+                    SelectFilter::make('view')
                         ->options(Page::getViewList()),
                 ]),
             )
 
-            ->actions(
+            ->recordActions(
                 static::renderTableActions(),
             )
             ->headerActions(
@@ -426,8 +435,8 @@ class PageResource extends Resource
                 static::renderHeaderActions(Importer::class, Exporter::class),
 
             )
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make(
+            ->toolbarActions([
+                BulkActionGroup::make(
                     static::renderBulkActions(Exporter::class)
 
                 ),

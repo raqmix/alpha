@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\MenuLink\ResourcePages;
 
+use Filament\Actions\CreateAction;
 use App\Filament\Resources\BaseResource\Pages\ListBase;
 use App\Filament\Resources\MenuLink\MenuLinkResource;
 use App\Traits\HasParentResource;
@@ -17,7 +18,7 @@ class ListItems extends ListBase
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()
+            CreateAction::make()
             ->url(
                 fn (): string => static::getParentResource()::getUrl('menu-links.create', [
                     'parent' => $this->parent,

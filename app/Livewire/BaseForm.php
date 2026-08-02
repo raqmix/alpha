@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Exception;
 use App\Classes\Utility;
 use Livewire\Component;
 use Illuminate\Support\Facades\Http;
@@ -75,7 +76,7 @@ class BaseForm extends Component
 
             $this->reset($this->getResettableFields());
         }
-        catch (\Exception $th)
+        catch (Exception $th)
         {
             throw $th;
             // dd($th->getMessage());

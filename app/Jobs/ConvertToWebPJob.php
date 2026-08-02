@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -76,7 +77,7 @@ class ConvertToWebPJob implements ShouldQueue
                 Storage::disk("public")->put($pathWithoutExt."-767.".$convertToExtension, $mobileWebpImage);
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("WebP conversion failed: " . $e->getMessage());
         }
     }

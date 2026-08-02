@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\MenuLink\ResourcePages;
 
+use Filament\Actions\DeleteAction;
 use App\Filament\Resources\BaseResource\Pages\EditBase;
 use App\Filament\Resources\MenuLink\MenuLinkResource;
 use App\Traits\HasParentResource;
@@ -21,7 +22,7 @@ class Edit extends EditBase
         ]);
     }
 
-    protected function configureDeleteAction(Actions\DeleteAction $action): void
+    protected function configureDeleteAction(DeleteAction $action): void
     {
         $resource = static::getResource();
 

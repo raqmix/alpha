@@ -2,10 +2,23 @@
 
 namespace App\Traits;
 
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ImportAction;
+use Filament\Support\Enums\Size;
+use Filament\Actions\ExportAction;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ExportBulkAction;
 use App\Filament\Jobs\CustomImportCsv;
 use App\Models\User;
 use App\Traits\AllColumnActionVisibility;
-use Filament\Support\Enums\ActionSize;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -16,12 +29,12 @@ trait CommonActionButtons
     {
         $defaultActions =
         [
-            Tables\Filters\TrashedFilter::make(),
+            TrashedFilter::make(),
 
-            Tables\Filters\SelectFilter::make('created_by')
+            SelectFilter::make('created_by')
             ->options(User::getAllList()),
 
-            Tables\Filters\SelectFilter::make('updated_by')
+            SelectFilter::make('updated_by')
                 ->options(User::getAllList()),
         ];
 
@@ -33,10 +46,10 @@ trait CommonActionButtons
     {
         $defaultActions =
         [
-            Tables\Actions\EditAction::make()->iconButton(),
-            Tables\Actions\DeleteAction::make()->iconButton(),
-            Tables\Actions\ForceDeleteAction::make(),
-            Tables\Actions\RestoreAction::make(),
+            EditAction::make()->iconButton(),
+            DeleteAction::make()->iconButton(),
+            ForceDeleteAction::make(),
+            RestoreAction::make(),
         ];
 
         return array_merge($customActions, $defaultActions);
@@ -48,7 +61,7 @@ trait CommonActionButtons
     {
         $defaultActions =
         [
-            Tables\Actions\ImportAction::make()
+            ImportAction::make()
                 ->importer($importer)
                 ->job(CustomImportCsv::class)
                 ->options([
@@ -58,16 +71,16 @@ trait CommonActionButtons
                 ->color("warning")
                 ->icon("heroicon-s-document-arrow-up")
                 ->iconButton()
-                ->size(ActionSize::Large)
+                ->size(Size::Large)
                 ->visible( static::importActionVisibility() ),
 
-            Tables\Actions\ExportAction::make()
+            ExportAction::make()
                 ->exporter($exporter)
                 ->chunkSize(500)
                 ->color("success")
                 ->icon("heroicon-o-inbox-arrow-down")
                 ->iconButton()
-                ->size(ActionSize::Large)
+                ->size(Size::Large)
                 ->visible( static::exportActionVisibility() ),
         ];
 
@@ -80,7 +93,7 @@ trait CommonActionButtons
         $defaultActions =
         [
 
-            Tables\Actions\BulkAction::make('publish')
+            BulkAction::make('publish')
                 ->action(fn (Collection $records) => static::BulkActivate($records))
                 ->deselectRecordsAfterCompletion()
                 ->requiresConfirmation()
@@ -88,7 +101,7 @@ trait CommonActionButtons
                 ->icon('fas-toggle-on')
                 ->visible( static::toggleColumnVisibility() ),
 
-            Tables\Actions\BulkAction::make('pending')
+            BulkAction::make('pending')
                 ->action(fn (Collection $records) => static::BulkDeactivate($records))
                 ->deselectRecordsAfterCompletion()
                 ->requiresConfirmation()
@@ -96,11 +109,11 @@ trait CommonActionButtons
                 ->icon('fas-toggle-off')
                 ->visible( static::toggleColumnVisibility() ),
 
-            Tables\Actions\DeleteBulkAction::make(),
-            Tables\Actions\ForceDeleteBulkAction::make(),
-            Tables\Actions\RestoreBulkAction::make(),
+            DeleteBulkAction::make(),
+            ForceDeleteBulkAction::make(),
+            RestoreBulkAction::make(),
 
-            Tables\Actions\ExportBulkAction::make()
+            ExportBulkAction::make()
                 ->exporter($exporter)
                 ->color("success")
                 ->icon("heroicon-o-inbox-arrow-down")

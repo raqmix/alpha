@@ -3,6 +3,7 @@
 namespace App\Classes\CustomPackage\CustomComponent;
 
 
+use BadMethodCallException;
 use BladeUI\Icons\Factory as IconFactory;
 use Closure;
 use Filament\Forms\Components\Select;
@@ -164,57 +165,57 @@ class CustomIconPicker extends Select
 
     public function relationship(string | Closure | null $name = null, string | Closure | null $titleAttribute = null, ?Closure $modifyQueryUsing = null, bool $ignoreRecord = false): static
     {
-        throw new \BadMethodCallException('Method not allowed.');
+        throw new BadMethodCallException('Method not allowed.');
     }
 
     public function options(Arrayable|Closure|array|string|null $options): static
     {
-        throw new \BadMethodCallException('Method not allowed.');
+        throw new BadMethodCallException('Method not allowed.');
     }
 
     public function allowHtml(bool|Closure $condition = true): static
     {
-        throw new \BadMethodCallException('Method not allowed.');
+        throw new BadMethodCallException('Method not allowed.');
     }
 
     public function searchable(bool|array|Closure $condition = true): static
     {
-        throw new \BadMethodCallException('Method not allowed.');
+        throw new BadMethodCallException('Method not allowed.');
     }
 
     public function getSearchResultsUsing(?Closure $callback): static
     {
-        throw new \BadMethodCallException('Method not allowed.');
+        throw new BadMethodCallException('Method not allowed.');
     }
 
     public function getOptionLabelFromRecordUsing(?Closure $callback): static
     {
-        throw new \BadMethodCallException('Method not allowed.');
+        throw new BadMethodCallException('Method not allowed.');
     }
 
     public function createOptionUsing(?Closure $callback): static
     {
-        throw new \BadMethodCallException('Method not allowed.');
+        throw new BadMethodCallException('Method not allowed.');
     }
 
     public function createOptionAction(?Closure $callback): static
     {
-        throw new \BadMethodCallException('Method not allowed.');
+        throw new BadMethodCallException('Method not allowed.');
     }
 
     public function createOptionForm(array|Closure|null $schema): static
     {
-        throw new \BadMethodCallException('Method not allowed.');
+        throw new BadMethodCallException('Method not allowed.');
     }
 
     public function schema(array|Closure $components): static
     {
-        throw new \BadMethodCallException('Method not allowed.');
+        throw new BadMethodCallException('Method not allowed.');
     }
 
     public function multiple(bool|Closure $condition = true): static
     {
-        throw new \BadMethodCallException('Method not allowed.');
+        throw new BadMethodCallException('Method not allowed.');
     }
 
     private function loadIcons(): Collection
