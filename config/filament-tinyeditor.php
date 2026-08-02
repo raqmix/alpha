@@ -62,6 +62,13 @@ return [
             'upload_directory' => null,
             'custom_configs' => [
                 'height' => 600,
+                /*
+                 * The package always emits image_class_list, defaulting to an
+                 * empty string, which TinyMCE 8 rejects ("must be a object[]").
+                 * custom_configs is spread after it in the init object, so this
+                 * overrides it with a valid value.
+                 */
+                'image_class_list' => [],
             ],
         ],
 
