@@ -31,7 +31,7 @@ trait HasParentResource
  
     public static function getParentResource(): string
     {
-        $parentResource = static::getResource()::$parentResource;
+        $parentResource = static::getResource()::$customParentResource;
  
         if (!isset($parentResource)) {
             throw new Exception('Parent resource is not set for '.static::class);
@@ -40,11 +40,11 @@ trait HasParentResource
         return $parentResource;
     }
  
-    protected function applyFiltersToTableQuery(Builder $query): Builder
+    protected function applyFiltersToTableQuery(Builder $query, bool $isResolvingRecord = false): Builder
     {
         // Apply any filters before the parent relationship key is applied.
-        $query = parent::applyFiltersToTableQuery($query);
- 
+        $query = parent::applyFiltersToTableQuery($query, $isResolvingRecord);
+
         return $query->where($this->getParentRelationshipKey(), $this->parent->getKey());
     }
  

@@ -43,7 +43,12 @@ class MenuLinkResource extends Resource
 
     protected static ?string $model = MenuLink::class;
 
-    public static string $parentResource = MenuResource::class;
+    /**
+     * Renamed from $parentResource: Filament v5 declares its own
+     * protected static ?string $parentResource for native nested resources,
+     * which this project's custom App\Traits\HasParentResource predates.
+     */
+    public static string $customParentResource = MenuResource::class;
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-newspaper';
 
@@ -262,7 +267,7 @@ class MenuLinkResource extends Resource
             ->recordActions([
                 EditAction::make()
                     ->url(
-                        fn(ListItems $livewire, Model $record): string => static::$parentResource::getUrl('menu-links.edit', [
+                        fn(ListItems $livewire, Model $record): string => static::$customParentResource::getUrl('menu-links.edit', [
                             'record' => $record,
                             'parent' => $livewire->parent,
                         ])

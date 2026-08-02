@@ -177,6 +177,13 @@ return [
         App\Providers\FilamentServiceProvider::class,
         Bepsvpt\SecureHeaders\SecureHeadersServiceProvider::class,
         OwenIt\Auditing\AuditingServiceProvider::class,
+
+        /*
+         * Vendored packages (see packages/) that no longer ship a Filament v5
+         * compatible release upstream, so they are no longer auto-discovered.
+         */
+        Outerweb\FilamentSettings\FilamentSettingsServiceProvider::class,
+        Kenepa\TranslationManager\TranslationManagerProvider::class,
     ])->toArray(),
 
     /*

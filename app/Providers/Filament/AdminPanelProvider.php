@@ -102,17 +102,21 @@ class AdminPanelProvider extends PanelProvider
                             ->navigationIcon('heroicon-o-photo')
                             ->navigationGroup('Setting')
                             ->navigationSort(3)
-                            ->navigationCountBadge()
-                            ->registerNavigation(true)
-                            ->defaultListView('grid' || 'list')
-                            ->resource(MediaResource::class),
+                            // Curator v5: navigationCountBadge() -> showBadge();
+                            // defaultListView() and resource() were removed.
+                            ->showBadge()
+                            ->registerNavigation(true),
 
                     FilamentSettingsPlugin::make()
                         ->pages([
                             AllSetting::class,
                         ]),
 
-                    FilamentShieldPlugin::make(),
+                    // These moved out of config/filament-shield.php in Shield v4.
+                    FilamentShieldPlugin::make()
+                        ->registerNavigation(false)
+                        ->navigationSort(-1)
+                        ->globallySearchable(false),
 
                     $activateOTP ? CustomFilamentOtpLoginPlugin::make() : null,
                 ]))

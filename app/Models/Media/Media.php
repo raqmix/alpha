@@ -13,6 +13,12 @@ class Media extends ModelsMedia implements Auditable
 
     use \OwenIt\Auditing\Auditable;
 
+    /**
+     * Curator v5 renamed its default table from `media` to `curator`. This
+     * project's data lives in `media`, so keep pointing at it.
+     */
+    protected $table = 'media';
+
     protected static function boot()
     {
         parent::boot();
