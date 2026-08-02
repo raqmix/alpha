@@ -118,7 +118,7 @@ class MessageTranslationResource extends Resource
                 static::renderFilterActions(),
             )
             ->recordActions([
-                //Tables\Actions\EditAction::make(),
+                //EditAction::make(),
                 //DeleteAction::make(),
 
             ])

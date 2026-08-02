@@ -4,7 +4,6 @@ namespace App\Helper;
 
 use Exception;
 use Imagick;
-use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -18,13 +17,13 @@ class RemoveBgHelper
             }
 
             $absolutePath = Storage::disk($disk)->path($path);
-            $image = Image::make($absolutePath);
+            $image = ImageHelper::manager()->read($absolutePath);
 
-            if (!($image->getCore() instanceof Imagick)) {
+            if (!($image->core()->native() instanceof Imagick)) {
                 throw new Exception('Imagick driver not being used. Check your Intervention Image configuration.');
             }
 
-            $imagick = $image->getCore();
+            $imagick = $image->core()->native();
             $imagick->setImageFormat('png');
             $imagick->setImageAlphaChannel(Imagick::ALPHACHANNEL_ACTIVATE);
 

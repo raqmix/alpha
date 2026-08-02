@@ -21,7 +21,7 @@ use App\Traits\CommonActionButtons;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\DeleteAction;
+use Filament\Actions\DeleteAction;
 use Filament\Tables\Table;
 
 class MessageCategoryResource extends Resource

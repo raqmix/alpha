@@ -19,7 +19,7 @@ use App\Filament\Resources\Button\ResourcePages\ListItems;
 use App\Filament\Resources\Button\ResourcePages\Create;
 use App\Filament\Resources\Button\ResourcePages\Edit;
 use App\Classes\CustomPackage\CustomComponent\CustomCuratorPicker;
-use App\Classes\CustomPackage\CustomComponent\CustomIconPicker;
+use Guava\IconPicker\Forms\Components\IconPicker;
 use App\Classes\FilamentUtility;
 use App\Filament\Resources\Bms\Model\Bms;
 use App\Filament\Resources\Button\Model\Button;
@@ -127,7 +127,8 @@ class ButtonResource extends Resource
                             ->schema([
 
 
-                                CustomIconPicker::make('icon'),
+                                IconPicker::make('icon')
+                                    ->sets(['fontawesome-solid', 'fontawesome-brands', 'fontawesome-regular']),
 
                                 DatePicker::make('published_at')
                                     ->label(__("Published At"))
@@ -233,7 +234,8 @@ class ButtonResource extends Resource
                             ->schema([
 
 
-                                CustomIconPicker::make('icon'),
+                                IconPicker::make('icon')
+                                    ->sets(['fontawesome-solid', 'fontawesome-brands', 'fontawesome-regular']),
 
                                 DatePicker::make('published_at')
                                     ->label(__("Published At"))

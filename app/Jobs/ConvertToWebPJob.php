@@ -11,8 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
-use Intervention\Image\ImageManagerStatic;
+use App\Helper\ImageHelper;
 
 class ConvertToWebPJob implements ShouldQueue
 {
@@ -60,21 +59,26 @@ class ConvertToWebPJob implements ShouldQueue
                 $fullPath = public_path($imagePath);
             }
             
-            $webpImage = ImageManagerStatic::make($fullPath)->encode($convertToExtension, 100);
-            Storage::disk("public")->put($pathWithoutExt.".".$convertToExtension, $webpImage);
+            $manager = ImageHelper::manager();
+
+            $encode = fn ($image) => $convertToExtension === 'avif'
+                ? $image->toAvif(100)
+                : $image->toWebp(100);
+
+            $webpImage = $encode($manager->read($fullPath));
+            Storage::disk("public")->put($pathWithoutExt.".".$convertToExtension, (string) $webpImage);
 
             $fullwebpPath = Storage::disk($disk)->path($pathWithoutExt.".".$convertToExtension);
-            $image = Image::make($fullwebpPath);
-            $width = $image->width();
+            $width = $manager->read($fullwebpPath)->width();
 
             if (!Storage::disk($disk)->exists($pathWithoutExt."-991.".$convertToExtension)) {
-                $tabletWebpImage = Image::make($fullwebpPath)->widen(ceil($width / 2))->stream();
-                Storage::disk("public")->put($pathWithoutExt."-991.".$convertToExtension, $tabletWebpImage);
+                $tabletWebpImage = $encode($manager->read($fullwebpPath)->scale(width: (int) ceil($width / 2)));
+                Storage::disk("public")->put($pathWithoutExt."-991.".$convertToExtension, (string) $tabletWebpImage);
             }
 
             if (!Storage::disk($disk)->exists($pathWithoutExt."-767.".$convertToExtension)) {
-                $mobileWebpImage = Image::make($fullwebpPath)->widen(ceil($width / 3))->stream();
-                Storage::disk("public")->put($pathWithoutExt."-767.".$convertToExtension, $mobileWebpImage);
+                $mobileWebpImage = $encode($manager->read($fullwebpPath)->scale(width: (int) ceil($width / 3)));
+                Storage::disk("public")->put($pathWithoutExt."-767.".$convertToExtension, (string) $mobileWebpImage);
             }
 
         } catch (Exception $e) {

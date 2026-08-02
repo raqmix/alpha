@@ -11,7 +11,7 @@ use App\Filament\Pages\Auth\CustomLogin;
 use App\Classes\CustomPackage\CustomPlugin\CustomFilamentOtpLoginPlugin;
 use App\Classes\CustomPackage\CustomPlugin\CustomTranslationManagerPlugin;
 use App\Models\Media\Media;
-use Awcodes\Curator\Resources\MediaResource;
+use Awcodes\Curator\Resources\Media\MediaResource;
 use CactusGalaxy\FilamentAstrotomic\FilamentAstrotomicTranslatablePlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
