@@ -70,7 +70,7 @@ class ContactUsForm extends BaseForm
                 'company' => ['nullable', 'string', 'max:255', 'not_regex:/<[^b][^r][^>]*>/'],
                 'product' => ['required', 'string', 'min:2', 'max:255', Rule::in(array_keys($this->productOptions)), 'not_regex:/<[^b][^r][^>]*>/'],
                 'message' => ['nullable', 'min:3', 'max:65535', 'not_regex:/<[^b][^r][^>]*>/'],
-                'captcha' => ['nullable'],
+                'captcha' => $this->captchaRules(),
             ];
     }
 
@@ -110,6 +110,8 @@ class ContactUsForm extends BaseForm
             'message.min' => 'Message must be at least 3 characters when provided.',
             'message.max' => 'Message is too long.',
             'message.not_regex' => 'Please remove invalid characters from your message.',
+
+            'captcha.required' => 'Please confirm that you are not a robot.',
         ];
     }
 

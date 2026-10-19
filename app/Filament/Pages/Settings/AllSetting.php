@@ -24,6 +24,8 @@ use Illuminate\Support\Str;
 use Filament\Forms\Components\Field;
 use App\Jobs\ClearCaches;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
+use App\Classes\Recaptcha;
 
 class AllSetting extends BaseSettings
 {
@@ -159,11 +161,29 @@ class AllSetting extends BaseSettings
 
 
                                     Section::make('Google Recaptcha')
+                                        ->description(fn() => new HtmlString(
+                                            e(__('Protects every webform on the website (Contact Us and Ask for a Quote) with an "I am not a robot" check.'))
+                                            . '<br>'
+                                            . (Recaptcha::usingUniversalKeys()
+                                                ? '<strong style="color:#b45309;">'
+                                                    . e(__('Currently using Google\'s universal test keys: the checkbox appears and the forms work, but every submission passes, so there is no real spam protection. Enter your own Site Key and Secret below before launch.'))
+                                                    . '</strong>'
+                                                : '<strong style="color:#166534;">'
+                                                    . e(__('Your own reCAPTCHA keys are in use.'))
+                                                    . '</strong>')
+                                        ))
                                         ->collapsed()
                                         ->schema([
 
+                                            Toggle::make('general.google_recaptcha_enabled')
+                                                ->label(__("Enable Google Recaptcha"))
+                                                ->helperText(__('When off, the checkbox disappears from every webform and submissions are accepted without it.'))
+                                                ->default(true)
+                                                ->columnSpanFull(),
+
                                             TextInput::make('general.google_recaptcha_site_key')
                                                 ->label(__("Google Recaptcha Site Key"))
+                                                ->helperText(__('Leave empty to fall back to Google\'s universal test key.'))
                                                 ->maxLength(255)
                                                 ->notRegex('/<[^b][^r][^>]*>/')
                                                 ->validationMessages([
@@ -172,6 +192,7 @@ class AllSetting extends BaseSettings
 
                                             TextInput::make('general.google_recaptcha_secret')
                                                 ->label(__("Google Recaptcha Secret"))
+                                                ->helperText(__('Leave empty to fall back to Google\'s universal test secret.'))
                                                 ->maxLength(255)
                                                 ->notRegex('/<[^b][^r][^>]*>/')
                                                 ->validationMessages([

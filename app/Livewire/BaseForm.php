@@ -2,9 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Classes\Recaptcha;
 use App\Classes\Utility;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 
@@ -31,25 +32,77 @@ class BaseForm extends Component
     }
 
 
+    /** Token handed over by the reCAPTCHA widget in the browser. */
     public $captcha = null;
 
+    /**
+     * Set once Google has confirmed the token above is genuine.
+     *
+     * #[Locked] matters here: public Livewire properties are writable from the
+     * browser, so without it a crafted request could simply set this to true
+     * and post straight past the check.
+     */
+    #[Locked]
+    public $captchaVerified = false;
+
+    /**
+     * Verify as soon as the visitor solves the challenge, so they get told about
+     * a bad token while they are still looking at the form rather than on submit.
+     *
+     * Tokens are single use, hence the flag: submit() trusts this result instead
+     * of asking Google about the same token a second time.
+     */
     public function updatedCaptcha($token)
     {
-        $response = Http::post(
-            'https://www.google.com/recaptcha/api/siteverify?secret='.
-            setting("general.google_recaptcha_secret").
-            '&response='.$token
-        );
+        if (! Recaptcha::enabled()) {
+            $this->captchaVerified = true;
 
-        $success = $response->json()['success'];
+            return;
+        }
 
-        if (!$success) {
+        $this->captchaVerified = Recaptcha::verify($token, request()->ip());
+
+        if (! $this->captchaVerified) {
             throw ValidationException::withMessages([
                 'captcha' => __('site.Google thinks, you are a bot, please refresh and try again!'),
             ]);
-        } else {
-            $this->captcha = true;
         }
+
+        $this->resetErrorBag('captcha');
+    }
+
+    /**
+     * Validation rules for the captcha field, for child forms to spread into
+     * their own rules() so the requirement follows the Site Settings toggle.
+     */
+    protected function captchaRules(): array
+    {
+        return Recaptcha::enabled() ? ['required'] : ['nullable'];
+    }
+
+    /**
+     * Server side gate. The rules only prove a token was posted; this proves we
+     * actually checked it with Google, so a crafted request cannot skip past by
+     * sending any non-empty string.
+     */
+    protected function assertCaptchaPassed(): void
+    {
+        if (! Recaptcha::enabled() || $this->captchaVerified) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'captcha' => __('site.Google thinks, you are a bot, please refresh and try again!'),
+        ]);
+    }
+
+    /** Clear the solved challenge here and in the browser after a submit. */
+    protected function resetCaptcha(): void
+    {
+        $this->captcha = null;
+        $this->captchaVerified = false;
+
+        $this->dispatch('recaptcha-reset', componentId: $this->getId());
     }
 
     public function submit()
@@ -59,6 +112,8 @@ class BaseForm extends Component
             $this->firsTime = false;
 
             $this->validate();
+
+            $this->assertCaptchaPassed();
 
             $this->uploadFilesIfExists($this);
 
@@ -74,6 +129,8 @@ class BaseForm extends Component
             session()->flash('success', 'Thank you. Your form was submitted successfully.');
 
             $this->reset($this->getResettableFields());
+
+            $this->resetCaptcha();
         }
         catch (\Exception $th)
         {

@@ -1463,7 +1463,13 @@ img {
     line-height: 1.4;
 }
 
-#contact-captcha.field-error-captcha {
+/* reCAPTCHA widget (rendered by x-common.recaptcha) */
+.recaptcha-field .recaptcha-widget {
+    display: inline-block;
+    max-width: 100%;
+}
+
+.recaptcha-field--error .recaptcha-widget {
     padding: 6px;
     border-radius: 8px;
     border: 1px solid #ef4444;

@@ -39,6 +39,8 @@
 
 @livewireScripts
 
+<x-common.recaptcha-scripts />
+
 @stack('js')
 
 <script type="text/javascript" src="{{ asset('js/custom.js') }}"></script>

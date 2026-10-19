@@ -98,10 +98,7 @@
         </div>
     </div>
 
-    <div class="form-group" wire:ignore>
-        <div id="contact-captcha" @class(['field-error-captcha' => $errors->has('captcha')])></div>
-        @error('captcha') <span class="field-error-text">{{ $message }}</span> @enderror
-    </div>
+    <x-common.recaptcha class="form-group full-width" />
 
     <div class="form-actions">
         <button type="submit" class="btn btn-primary">Submit Request</button>

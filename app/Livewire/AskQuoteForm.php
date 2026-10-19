@@ -102,7 +102,7 @@ class AskQuoteForm extends BaseForm
             'quantity' => ['required', 'integer', 'min:1'],
             'file_upload' => ['nullable', 'file', 'max:20480', 'mimes:pdf,ai,eps,psd,png,jpg,jpeg'],
             'message' => ['nullable', 'max:65535', 'not_regex:/<[^b][^r][^>]*>/'],
-            'captcha' => ['nullable'],
+            'captcha' => $this->captchaRules(),
         ];
     }
 
@@ -124,6 +124,7 @@ class AskQuoteForm extends BaseForm
             'quantity.min' => 'Quantity must be at least 1.',
             'file_upload.max' => 'File size must be less than 20 MB.',
             'file_upload.mimes' => 'Allowed file types: pdf, ai, eps, psd, png, jpg, jpeg.',
+            'captcha.required' => 'Please confirm that you are not a robot.',
         ];
     }
 
