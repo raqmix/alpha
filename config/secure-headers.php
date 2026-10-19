@@ -523,6 +523,9 @@
                             'https://google.com',
                             'https://analytics.google.com',
                             'https://unpkg.com',
+                            // Google reCAPTCHA
+                            'https://www.google.com',
+                            'https://www.gstatic.com',
                         ],
                     ],
 
@@ -580,6 +583,9 @@
                             'https://www.googletagmanager.com',
                             'https://*.tile.openstreetmap.org',
                             'https://unpkg.com',
+                            // Google reCAPTCHA
+                            'https://www.google.com',
+                            'https://www.gstatic.com',
                         ],
                     ],
 
@@ -663,6 +669,10 @@
                             'https://cdn.tailwindcss.com',
                             'https://cdnjs.cloudflare.com',
                             'https://unpkg.com',
+                            // Google reCAPTCHA: api.js lives on www.google.com and
+                            // loads its implementation from www.gstatic.com.
+                            'https://www.google.com',
+                            'https://www.gstatic.com',
                         ],
 
                         'schemes' => [

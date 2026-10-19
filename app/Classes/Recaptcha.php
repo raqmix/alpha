@@ -127,6 +127,14 @@ class Recaptcha
     }
 
     /**
+     * Public wrapper over the boolean cast, for the settings form to reuse.
+     */
+    public static function settingIsTruthy(mixed $value): bool
+    {
+        return static::toBool($value);
+    }
+
+    /**
      * Cast a stored setting to a boolean, tolerating the raw json form.
      * Anything unrecognisable falls back to enabled, which is the safe
      * direction for a spam check.

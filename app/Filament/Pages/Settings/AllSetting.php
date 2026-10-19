@@ -178,7 +178,11 @@ class AllSetting extends BaseSettings
                                             Toggle::make('general.google_recaptcha_enabled')
                                                 ->label(__("Enable Google Recaptcha"))
                                                 ->helperText(__('When off, the checkbox disappears from every webform and submissions are accepted without it.'))
-                                                ->default(true)
+                                                // ->default() does not apply here: fillForm() passes an array, so an
+                                                // unsaved key arrives as null and would render the toggle off, letting
+                                                // the next save silently disable reCAPTCHA everywhere. Treat null as on,
+                                                // matching Recaptcha::enabled().
+                                                ->formatStateUsing(fn($state) => is_null($state) ? true : Recaptcha::settingIsTruthy($state))
                                                 ->columnSpanFull(),
 
                                             TextInput::make('general.google_recaptcha_site_key')

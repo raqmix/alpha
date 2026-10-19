@@ -3,12 +3,18 @@
 namespace Tests\Feature;
 
 use App\Classes\Recaptcha;
+use App\Filament\Pages\Settings\AllSetting;
 use App\Livewire\AskQuoteForm;
 use App\Livewire\ContactUsForm;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
+use Livewire\Component;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -45,8 +51,10 @@ class RecaptchaWebformTest extends TestCase
         config(['recaptcha.enabled' => false]);
 
         $this->assertFalse(Recaptcha::enabled());
-        $this->assertSame('', trim(Blade::render('<x-common.recaptcha />')));
-        $this->assertSame('', trim(Blade::render('<x-common.recaptcha-scripts />')));
+        // Blade leaves conditional markers behind; what matters is that no
+        // widget and no script survive.
+        $this->assertStringNotContainsString('data-recaptcha', Blade::render('<x-common.recaptcha />'));
+        $this->assertStringNotContainsString('recaptcha/api.js', Blade::render('<x-common.recaptcha-scripts />'));
     }
 
     public function test_the_api_script_is_loaded_once_from_the_footer(): void
@@ -155,6 +163,104 @@ class RecaptchaWebformTest extends TestCase
         ]);
 
         $this->assertFalse(Recaptcha::verify('any-token'));
+    }
+
+    /**
+     * The browser has to be allowed to fetch the widget. Without the Google
+     * origins in script-src the page renders perfectly and the checkbox never
+     * appears, which is exactly how this broke in production.
+     *
+     * config/secure-headers.php returns the real policy only for web requests
+     * (it short circuits on php_sapi_name() === 'cli'), so config() under
+     * PHPUnit hands back the package defaults instead. Read the file.
+     */
+    public function test_the_csp_lets_the_browser_load_the_widget(): void
+    {
+        $config = file_get_contents(config_path('secure-headers.php'));
+
+        $directive = function (string $name) use ($config): string {
+            $start = strpos($config, "'{$name}' => [");
+            $this->assertNotFalse($start, "CSP directive {$name} is missing.");
+
+            // Each directive is introduced by its own MDN reference comment,
+            // so the next one marks where this block ends.
+            $end = strpos($config, '// https://developer.mozilla.org', $start);
+
+            return substr($config, $start, $end === false ? 2000 : $end - $start);
+        };
+
+        foreach (['script-src', 'img-src', 'connect-src', 'frame-src'] as $name) {
+            $block = $directive($name);
+
+            foreach (['https://www.google.com', 'https://www.gstatic.com'] as $origin) {
+                if ($name === 'frame-src' && $origin === 'https://www.gstatic.com') {
+                    continue; // the challenge iframe is served from www.google.com only
+                }
+
+                $this->assertStringContainsString(
+                    $origin,
+                    $block,
+                    sprintf('%s must allow %s or the reCAPTCHA widget cannot load.', $name, $origin),
+                );
+            }
+        }
+    }
+
+    /**
+     * With the setting never saved, the toggle has to render ON. Filament's
+     * ->default() does not apply when fillForm() passes an array, so an unsaved
+     * key arrived as null, showed the toggle off, and the next save would have
+     * silently disabled reCAPTCHA across the site.
+     */
+    public function test_the_settings_toggle_defaults_to_on_when_never_saved(): void
+    {
+        $toggle = null;
+
+        $walk = function ($components) use (&$walk, &$toggle) {
+            foreach ($components as $component) {
+                if ($toggle) {
+                    return;
+                }
+
+                if ($component instanceof Toggle && $component->getName() === Recaptcha::ENABLED_SETTING) {
+                    $toggle = $component;
+
+                    return;
+                }
+
+                foreach (['getChildComponents', 'getDefaultChildComponents'] as $method) {
+                    if (method_exists($component, $method)) {
+                        try {
+                            $walk($component->$method());
+                        } catch (\Throwable $e) {
+                            // Components that need a live form context: skip.
+                        }
+                    }
+                }
+            }
+        };
+
+        $walk((new AllSetting())->schema());
+
+        $this->assertNotNull($toggle, 'The reCAPTCHA toggle is missing from Site Settings.');
+
+        $host = new class extends Component implements HasForms {
+            use InteractsWithForms;
+
+            public ?array $data = [];
+
+            public function render()
+            {
+                return '<div></div>';
+            }
+        };
+
+        $form = Form::make($host)->statePath('data')->schema([$toggle]);
+
+        // Exactly what AllSetting::fillForm() passes when the key was never saved.
+        $form->fill([]);
+
+        $this->assertTrue(data_get($form->getState(), Recaptcha::ENABLED_SETTING));
     }
 
     public function test_a_blank_token_is_never_verified(): void
